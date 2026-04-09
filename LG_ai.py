@@ -232,7 +232,8 @@ if st.session_state.app_step == 0:
         
         responses = []
         for i, question in enumerate(das_40_questions[:40]):
-            ans = st.radio(f"**{i+1}. {question}**", options_7pt, index=None, horizontal=True)
+            # horizontal=False 로 변경하여 세로로 배치되도록 수정
+            ans = st.radio(f"**{i+1}. {question}**", options_7pt, index=None, horizontal=False)
             responses.append((i+1, ans))
             
         submitted = st.form_submit_button("검사 완료 및 설정 저장")
@@ -296,30 +297,51 @@ elif st.session_state.app_step == 2:
     
     past_summaries_text = "\n".join([f"- Day {i+1}: {summary}" for i, summary in enumerate(st.session_state.daily_summaries)]) if st.session_state.daily_summaries else "아직 이전 상담 기록이 없습니다."
 
+    # --- 시스템 프롬프트 업데이트 (책 내용 완벽 반영) ---
+    base_cbt_instructions = f"""
+    당신은 인지행동치료(CBT) 원칙에 기반하여 사용자의 인지 재구조화를 돕는 전문 AI 심리 상담사이다.
+    [사용자 취약 영역]: {max_cat}
+
+    [CBT 14가지 치료 원칙 및 필수 지침]
+    1. 치료 계획은 끊임없이 진화하는 인지개념화를 기반으로 한다.
+    2. 건전한 치료적 관계가 필요하다.
+    3. 내담자의 진전 상황을 지속적으로 관찰한다.
+    4. 개인의 문화에 맞게 적용되고 개별화된 치료를 제공한다.
+    5. 긍정성을 강조한다.
+    6. 협력과 적극적인 참여를 강조한다.
+    7. 열망적이고, 가치에 기반하며, 목표 지향적이다.
+    8. 초기에는 현재를 강조한다.
+    9. 교육적이다.
+    10. 시간에 민감하다.
+    11. 회기는 구조화되어 있다.
+    12. 길잡이식 발견을 사용하고, 내담자가 그들의 역기능적 인지에 반응하도록 가르친다.
+    13. 활동 계획(치료 과제/숙제)이 반드시 포함된다.
+    14. 사고, 기분, 행동의 변화를 위해 다양한 기법을 사용한다.
+
+    [상담사로서의 태도]
+    - 모든 회기마다 내가 내담자로서 대우받고 싶은 방식으로 모든 내담자를 똑같이 대우하라.
+    - 상담실에서 따뜻한 한 사람으로서 내담자가 안전하다고 느끼도록 도와라.
+    - 내담자는 도전에 직면해야 함을 기억하라. 그것이 그들이 치료가 필요한 이유이다. 무조건적인 위로만 하는 것이 아니라 현실적이고 합리적인 기대를 유지하라.
+    - 공감("~해서 정말 힘들었겠어요"), 수용, 타당화, 정확한 이해, 영감을 주는 희망, 진정한 따뜻함, 관심, 긍정적인 존중, 돌봄, 격려, 긍정적 강화, 연민, 유머 등 훌륭한 상담 기술을 보여주어라.
+
+    [진행 및 시스템 자동화 지침]
+    - 글씨나 폰트 강조를 위해 '*' 기호를 사용하지 마라.
+    - 길잡이식 발견(하향 화살표 기법)을 통해 사용자의 스트레스 상황과 역기능적 인지를 탐색하라.
+    - [중요] 단 몇 번의 대화만으로 섣불리 종료하지 마라. 충분한 탐색(최소 3~4턴 이상)을 거친 후, 사용자가 인지 오류를 깨닫거나 더 이상 깊은 탐색이 어려울 때, 내일 일상에서 실천할 수 있는 '아주 작은 행동 실험(숙제)'을 제안하며 회기를 마무리하라.
+    - **[핵심 자동화 트리거]** 대화를 마무리하고 숙제를 부여한 뒤, 오늘의 상담을 종료해도 좋다고 스스로 판단되면 당신의 마지막 답변 맨 끝에 반드시 `[SESSION_END]` 라는 태그를 적어라. 이 태그가 인식되면 시스템이 자동으로 상담을 종료하고 숙제 요약 프로세스를 시작한다.
+    """
+
     if st.session_state.current_day == 1:
-        system_prompt = f"""
-        당신은 인지행동치료(CBT)를 기반으로 사용자의 인지 재구조화를 돕는 전문 AI 심리 가이드이다. 
-        [사용자 취약 영역]: {max_cat}
-        [지침] 글씨나 폰트 강조를 위해 '*' 사용 금지
-        하향 화살표 기법으로 사용자의 오늘 하루 스트레스를 탐색하라.
-        사용자의 인지오류가 순간적으로 고쳐지거나 사용자의 대화 내용이 계속 반복될 경우, 
-        대화의 끝에는 반드시 사용자가 일상에서 실천할 수 있는 '아주 작은 행동 숙제'를 하나 제안해야 한다.
-        모든 회기마다 내가 내담자로서 대우받고 싶은 방식으로 모든 내담자를 똑같이 대우하자. 
-        상담실에서 따뜻한 한 사람으로 내담자가 안전하다고 느끼도록 돕자. 
-        내담자는 도전에 직면해야 함을 기억하자. 그것이 그들이 치료가 필요한 이유이다. 
-        내담자와 치료자 자신에 대한 기대치를 합리적으로 유지하자.
-        """
+        system_prompt = base_cbt_instructions + "\n오늘은 첫 회기이므로, 오늘의 스트레스나 마음 상태를 물어보며 하향 화살표 기법을 시작하라."
     else:
-        system_prompt = f"""
-        당신은 전문 AI 심리 가이드이다. 
-        [사용자 취약 영역]: {max_cat}
+        system_prompt = base_cbt_instructions + f"""
         [과거 상담 핵심 요약 기록]:
         {past_summaries_text}
         
         [어제 내준 숙제 요약]: {st.session_state.yesterday_homework}
         [지침] 반드시 첫인사로 어제 내준 숙제를 잘 실천했는지 다정하게 점검하라. 
         과거 요약 기록을 참고하여 내담자의 성장이나 패턴을 자연스럽게 언급하며 공감대를 형성하라.
-        그 후 오늘 새롭게 겪은 스트레스 상황을 물어보고, 하향 화살표 기법으로 대화를 이어나가라. 대화 끝에는 내일 해볼 새로운 행동 숙제를 제안하라.
+        그 후 오늘 새롭게 겪은 스트레스 상황을 물어보고, 대화를 이어나가라.
         """
 
     model = genai.GenerativeModel('gemini-3.1-pro-preview', system_instruction=system_prompt)
@@ -366,30 +388,70 @@ elif st.session_state.app_step == 2:
             with st.chat_message("assistant"):
                 message_placeholder = st.empty()
                 full_response = ""
+                display_text = ""
                 try:
                     chat = model.start_chat(history=gemini_history)
                     response = chat.send_message(user_input, stream=True)
                     for chunk in response:
                         if chunk.text:
                             full_response += chunk.text
-                            message_placeholder.markdown(full_response + "▌")
-                    message_placeholder.markdown(full_response)
+                            # 사용자 화면에는 [SESSION_END] 태그가 보이지 않도록 필터링
+                            display_text = full_response.replace("[SESSION_END]", "")
+                            message_placeholder.markdown(display_text + "▌")
+                    message_placeholder.markdown(display_text)
                 except Exception as e:
                     full_response = "오류가 발생했습니다."
+                    display_text = full_response
                     message_placeholder.markdown(full_response)
                     
-            st.session_state.chat_history.append({"role": "assistant", "content": full_response})
+            # 히스토리에는 태그를 제거한 순수 텍스트만 저장
+            clean_response = full_response.replace("[SESSION_END]", "").strip()
+            st.session_state.chat_history.append({"role": "assistant", "content": clean_response})
             save_state() 
 
-        st.markdown("---")
-        if st.button("오늘의 상담 종료하고 숙제 받기", use_container_width=True):
-            st.session_state.session_ended = True
-            save_state()
-            st.rerun()
+            # AI가 세션 종료를 결정한 경우 자동 요약 진행
+            if "[SESSION_END]" in full_response:
+                st.session_state.session_ended = True
+                
+                # --- 백그라운드에서 요약 및 숙제 추출 ---
+                summary_prompt = f"""
+                다음은 CBT 심리 가이드가 상담을 종료하며 사용자에게 남긴 마지막 메시지입니다.
+                이 메시지에서 사용자가 내일 일상에서 실천해야 할 '행동 숙제(행동 실험)' 부분만 찾아서 딱 1~2줄로 짧고 명확하게 요약해 주세요.
+                만약 명시적인 숙제가 없다면 '특별한 숙제 없음'이라고 답변해 주세요.
+                [가이드의 마지막 메시지] {clean_response}
+                """
+                
+                chat_full_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state.chat_history])
+                daily_memory_prompt = f"""
+                다음은 오늘 사용자와 나눈 심리 상담 대화 기록 전체입니다.
+                이 대화에서 나타난 사용자의 '핵심 감정, 주된 인지 오류, 그리고 대화를 통해 긍정적으로 변화된 점'을 딱 1~2줄로 요약해 주세요.
+                이 요약은 내일 상담 시 AI가 사용자의 성장 과정을 기억하기 위한 참고 자료로 사용됩니다.
+                [오늘의 대화 기록] {chat_full_text}
+                """
+                
+                with st.spinner("AI가 오늘의 상담을 갈무리하고 있습니다..."):
+                    try:
+                        summary_model = genai.GenerativeModel('gemini-2.5-flash')
+                        
+                        # 숙제 요약 추출
+                        hw_response = summary_model.generate_content(summary_prompt)
+                        st.session_state.yesterday_homework = hw_response.text.strip()
+                        
+                        # 대화 전체 요약 저장
+                        mem_response = summary_model.generate_content(daily_memory_prompt)
+                        st.session_state.daily_summaries.append(mem_response.text.strip())
+                        
+                    except:
+                        st.session_state.yesterday_homework = clean_response[:50] + "...(요약 오류)"
+                        st.session_state.daily_summaries.append("시스템 오류로 요약이 저장되지 않았습니다.")
+                
+                save_state()
+                st.rerun()
 
     else:
         st.success(f"Day {st.session_state.current_day} 인지 훈련 세션 완료!")
-        st.info("AI가 마지막으로 남긴 메시지(숙제)를 꼭 확인해 주세요.")
+        st.info("오늘의 상담이 종료되었습니다. AI가 남긴 마지막 메시지(숙제)를 꼭 확인해 주세요.")
+        st.markdown(f"**💡 내일 점검할 AI 요약 숙제:**\n> {st.session_state.yesterday_homework}")
         st.markdown("---")
         
         col1, col2 = st.columns(2)
@@ -403,40 +465,7 @@ elif st.session_state.app_step == 2:
             if st.session_state.current_day < st.session_state.target_days:
                 if st.button("다음 날(Next Day) 대화로 넘어가기"):
                     st.session_state.current_day += 1
-                    
-                    # 1. 내일 점검할 숙제 요약 추출
-                    last_ai_msg = st.session_state.chat_history[-1]["content"]
-                    summary_prompt = f"""
-                    다음은 CBT 심리 가이드가 상담을 종료하며 사용자에게 남긴 마지막 메시지입니다.
-                    이 메시지에서 사용자가 내일 일상에서 실천해야 할 '행동 숙제(행동 실험)' 부분만 찾아서 딱 1~2줄로 짧고 명확하게 요약해 주세요.
-                    만약 명시적인 숙제가 없다면 '특별한 숙제 없음'이라고 답변해 주세요.
-                    [가이드의 마지막 메시지] {last_ai_msg}
-                    """
-                    
-                    # 2. 장기 기억을 위한 오늘 전체 대화 요약 추출
-                    chat_full_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state.chat_history])
-                    daily_memory_prompt = f"""
-                    다음은 오늘 사용자와 나눈 심리 상담 대화 기록 전체입니다.
-                    이 대화에서 나타난 사용자의 '핵심 감정, 주된 인지 오류, 그리고 대화를 통해 긍정적으로 변화된 점'을 딱 1~2줄로 요약해 주세요.
-                    이 요약은 내일 상담 시 AI가 사용자의 성장 과정을 기억하기 위한 참고 자료로 사용됩니다.
-                    [오늘의 대화 기록] {chat_full_text}
-                    """
-                    
-                    try:
-                        summary_model = genai.GenerativeModel('gemini-2.5-flash')
-                        
-                        # 숙제 요약 받아오기
-                        hw_response = summary_model.generate_content(summary_prompt)
-                        st.session_state.yesterday_homework = hw_response.text.strip()
-                        
-                        # 전체 대화 요약 받아와서 저장소에 넣기
-                        mem_response = summary_model.generate_content(daily_memory_prompt)
-                        st.session_state.daily_summaries.append(mem_response.text.strip())
-                        
-                    except:
-                        st.session_state.yesterday_homework = last_ai_msg[:50] + "...(요약 오류)"
-                        st.session_state.daily_summaries.append("시스템 오류로 요약이 저장되지 않았습니다.")
-                    
+                    # 다음 날로 넘어갈 때 히스토리 초기화 및 플래그 해제
                     st.session_state.chat_history = [] 
                     st.session_state.session_ended = False
                     save_state() 
@@ -459,7 +488,8 @@ elif st.session_state.app_step == 3:
         st.subheader("DAS-40 사후 문항")
         responses = []
         for i, question in enumerate(das_40_questions[:40]):
-            ans = st.radio(f"**{i+1}. {question}**", options_7pt, index=None, horizontal=True)
+            # horizontal=False 로 변경하여 세로로 배치되도록 수정
+            ans = st.radio(f"**{i+1}. {question}**", options_7pt, index=None, horizontal=False)
             responses.append((i+1, ans))
             
         submitted = st.form_submit_button("사후 검사 완료 및 결과 보기")
