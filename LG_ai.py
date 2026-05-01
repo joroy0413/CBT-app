@@ -367,7 +367,7 @@ elif st.session_state.app_step == 1:
         save_state() 
         st.rerun()
 
-# --- 화면 C (Step 2): 요청하신 <필링굿> 원문을 대거 이식한 매시브 프롬프트 챗봇 ---
+# --- 화면 C (Step 2): 프롬프트 챗봇 ---
 elif st.session_state.app_step == 2:
     st.title(f"CBT 심리 가이드 - Day {st.session_state.current_day} / {st.session_state.target_days}")
     st.caption(f"안전하고 따뜻한 공간입니다. {st.session_state.user_name} 님의 마음속 이야기를 편하게 꺼내어 주세요.")
@@ -378,7 +378,7 @@ elif st.session_state.app_step == 2:
     max_cat = max(scores, key=scores.get)
     past_summaries_text = "\n".join([f"- Day {i+1}: {summary}" for i, summary in enumerate(st.session_state.daily_summaries)]) if st.session_state.daily_summaries else "아직 이전 상담 기록이 없습니다."
 
-    # [프롬프트 엔지니어링] 요청하신 <필링굿> 원문 복붙 적용본
+    # [프롬프트 엔지니어링] 
     base_cbt_instructions = f"""
     당신은 인지행동치료(CBT) 원칙에 기반하여 사용자의 인지 재구조화를 돕는 전문 AI 심리 상담사이다.
     [사용자 취약 영역]: {max_cat}
@@ -473,7 +473,6 @@ elif st.session_state.app_step == 2:
                 st.markdown(user_input)
             
             gemini_history = [{"role": "user", "parts": ["안녕! 시작하자"]}]
-            # 슬라이싱 버그 수정 [-6:] -> [-5:]
             for msg in st.session_state.chat_history[-5:]:
                 role = "model" if msg["role"] == "assistant" else "user"
                 gemini_history.append({"role": role, "parts": [msg["content"]]})
@@ -481,7 +480,6 @@ elif st.session_state.app_step == 2:
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             
             with st.chat_message("assistant"):
-                # 로딩 스피너에 이름 적용!
                 with st.spinner(f"{st.session_state.user_name} 님의 마음에 다가가는 중입니다..."):
                     message_placeholder = st.empty()
                     full_response = ""
@@ -496,7 +494,7 @@ elif st.session_state.app_step == 2:
                                 message_placeholder.markdown(display_text + "▌")
                         message_placeholder.markdown(display_text)
                     except Exception as e:
-                        full_response = "상담 시스템 처리 중 오류가 발생했습니다. 다시 말씀해 주시겠어요?"
+                        full_response = f"🚨 시스템 에러 발생 (구글 API): {str(e)}"
                         display_text = full_response
                         message_placeholder.markdown(full_response)
                     
