@@ -282,7 +282,7 @@ if st.session_state.app_step >= 1 and st.session_state.initial_scores:
 # ==========================================
 
 if st.session_state.app_step == 0:
-    st.title("Step 1. 내면의 지도 그리기")
+    st.title("Step 0. 내면의 지도 그리기")
     
     st.info("💡 **기존 참여자이신가요?** 진행 중인 이메일을 입력하시면 클라우드에서 이전 상담 기록을 불러옵니다.")
     col_em, col_btn = st.columns([3, 1])
@@ -342,7 +342,7 @@ if st.session_state.app_step == 0:
                 st.rerun()
 
 elif st.session_state.app_step == 1:
-    st.title("Step 1.5. 인지적 기준선 심층 분석 결과")
+    st.title("Step 1. 인지적 기준선 심층 분석 결과")
     st.markdown(f"작성해주신 DAS-40 검사를 바탕으로 **{st.session_state.user_name}** 님의 마음 지형도를 분석했습니다. 아래의 그래프와 심층 분석 리포트를 꼼꼼히 읽어보세요.")
     
     scores = st.session_state.initial_scores
@@ -437,7 +437,7 @@ elif st.session_state.app_step == 2:
         {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
     ]
 
-    model = genai.GenerativeModel('gemini-1.5-pro', system_instruction=system_prompt, safety_settings=safety_settings)
+    model = genai.GenerativeModel('gemini-2.5-pro', system_instruction=system_prompt, safety_settings=safety_settings)
 
     name = st.session_state.user_name
     dynamic_greetings = [
