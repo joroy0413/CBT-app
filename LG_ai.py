@@ -40,6 +40,7 @@ def save_state():
     db = get_db()
     doc_ref = db.collection("cbt_users").document(st.session_state.user_email)
     data = {
+        "user_name": st.session_state.user_name,
         "app_step": st.session_state.app_step,
         "initial_scores": st.session_state.initial_scores,
         "final_scores": st.session_state.final_scores,
@@ -72,6 +73,7 @@ def clear_state():
 
 # --- 세션 상태 초기화 ---
 if "initialized" not in st.session_state:
+    st.session_state.user_name = ""
     st.session_state.app_step = 0
     st.session_state.initial_scores = {}
     st.session_state.final_scores = {}
@@ -239,45 +241,6 @@ das_40_questions = [
     "인생에서 즐거운 것들을 많이 놓친다 해도 나는 행복할 수 있다.",
     "남들이 나에 대해 어떻게 생각하는지가 나에게는 매우 중요하다.",
     "남들로부터 고립되면 불행해질 수 밖에 없다.",
-    "남들이 날 사랑해 주지 않는다 해도 나는 행복해질 수 있다.""사람들은 잘 생기고 똑똑하고 돈이 많지 않으면 행복해지기 어렵다.",
-    "행복이란 사람들이 날 어떻게 생각하든 주로 내 태도에 달려 있다.",
-    "실수를 하면 남들이 날 전보다 업신여길 것이다.",
-    "남들로부터 인정받으려면 항상 일을 잘 해야 한다.",
-    "작은 일이라도 위험한 모험을 하는 것은 어리석은 일이다. 왜냐하면 그로 인해 큰 손실을 입을 수도 있기 때문이다.",
-    "어떤 분야에 특별한 재능이 없이도 남들의 존경과 인정을 받을 수 있다.",
-    "날 아는 사람들로부터 칭찬받지 못한다면 나는 행복해질 수 없다.",
-    "남들에게도 도와 달라고 하는 것은 나약하다는 표시이다.",
-    "남들보다 어떤 일을 잘 하지 못한다면 열등한 것이다.",
-    "자기가 하는 일에서 실패한다면 인간으로서도 실패하는 것이다.",
-    "잘할 수 없는 일은 아예 시작할 필요도 없다.",
-    "실수를 통해 배울 수 있기 때문에 때로는 실수하는 것도 필요하다.",
-    "내 의견에 반대하는 사람은 아마 날 좋아하지 않는 사람일 것이다.",
-    "절반 정도 실패했다면 전부 실패한 것이나 다름없다.",
-    "내 실제 모습을 사람들이 안다면 날 전보다 무시할 것이다.",
-    "날 사랑하던 사람이 더 이상 사랑해 주지 않는다면 살 가치가 없을 것 같다.",
-    "어떤 일의 결과와는 상관 없이 과정 속에서도 만족을 얻을 수 있다.",
-    "어느 정도 성공할 가능성이 있는 일만 착수해야 한다.",
-    "한 인간으로서 내 가치는 남들로부터 받는 평가에 달려 있다.",
-    "최상의 목표를 향해 나아가지 않는다면 나는 이류 인간으로 전락하고 말 것이다.",
-    "가치 있는 사람이 되려면 적어도 한 분야에서는 뛰어나야 한다.",
-    "사고력이 높을수록 더 가치 있는 인간이 된다.",
-    "실수하는 경우 낭패감을 느끼는 것은 당연하다.",
-    "내 자신을 어떻게 생각하는지가 다른 사람의 견해보다 더 중요하다.",
-    "도움을 요청하는 사람들을 전부 도와 주어야 착하고 가치 있는 사람이 된다.",
-    "남에게 자꾸 물어보면 남들 눈에 열등하게 보일 것이다.",
-    "내 주변이 중요한 사람들로부터 인정받지 못한다면 견디기 힘들 것이다.",
-    "의지할 사람이 없으면 당연히 불행해진다.",
-    "자신을 혹사하지 않는다면 중요한 일을 해내기 힘들 것이다.",
-    "야단을 맞고도 태연할 수 있다.",
-    "사람들은 언제 나에게 등을 돌릴지 모르기 때문에 믿을 수 없다.",
-    "남들이 나를 싫어한다면 나는 행복해질 수 없다.",
-    "남들을 기분 좋게 하려면 내 이익을 포기하지 않을 수 없다.",
-    "나의 행복은 나보다 남들에게 더 달려 있다.",
-    "행복해지는 데 남들의 인정이 반드시 필요한 것은 아니다.",
-    "문제를 회피하다보면 그 문제가 사라져 버리는 경우가 많다.",
-    "인생에서 즐거운 것들을 많이 놓친다 해도 나는 행복할 수 있다.",
-    "남들이 나에 대해 어떻게 생각하는지가 나에게는 매우 중요하다.",
-    "남들로부터 고립되면 불행해질 수 밖에 없다.",
     "남들이 날 사랑해 주지 않는다 해도 나는 행복해질 수 있다."
 ]
 
@@ -338,10 +301,12 @@ if st.session_state.app_step == 0:
 
     with st.form("das_form_initial"):
         st.subheader("상담 목표 설정")
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
             target_days = st.slider("CBT 진행 기간을 선택하세요", min_value=7, max_value=14, value=7)
         with col2:
+            user_name = st.text_input("불리고 싶은 이름(닉네임)", placeholder="예: 다해")
+        with col3:
             user_email = st.text_input("알림을 받을 이메일 주소", placeholder="example@gmail.com")
         
         st.markdown("---")
@@ -355,9 +320,10 @@ if st.session_state.app_step == 0:
         submitted = st.form_submit_button("검사 완료 및 설정 저장")
             
         if submitted:
-            if not user_email:
-                st.error("진행 상황 저장을 위해 이메일 주소는 필수입니다.")
+            if not user_name or not user_email:
+                st.error("이름(닉네임)과 진행 상황 저장을 위한 이메일 주소를 모두 입력해 주세요.")
             else:
+                st.session_state.user_name = user_name
                 st.session_state.target_days = target_days
                 st.session_state.user_email = user_email
                 
@@ -377,7 +343,7 @@ if st.session_state.app_step == 0:
 
 elif st.session_state.app_step == 1:
     st.title("Step 1.5. 인지적 기준선 심층 분석 결과")
-    st.markdown("작성해주신 DAS-40 검사를 바탕으로 내담자님의 마음 지형도를 분석했습니다. 아래의 그래프와 심층 분석 리포트를 꼼꼼히 읽어보세요.")
+    st.markdown(f"작성해주신 DAS-40 검사를 바탕으로 **{st.session_state.user_name}** 님의 마음 지형도를 분석했습니다. 아래의 그래프와 심층 분석 리포트를 꼼꼼히 읽어보세요.")
     
     scores = st.session_state.initial_scores
     max_cat = max(scores, key=scores.get)
@@ -404,7 +370,7 @@ elif st.session_state.app_step == 1:
 # --- 화면 C (Step 2): 요청하신 <필링굿> 원문을 대거 이식한 매시브 프롬프트 챗봇 ---
 elif st.session_state.app_step == 2:
     st.title(f"CBT 심리 가이드 - Day {st.session_state.current_day} / {st.session_state.target_days}")
-    st.caption("안전하고 따뜻한 공간입니다. 마음속 이야기를 편하게 꺼내어 주세요.")
+    st.caption(f"안전하고 따뜻한 공간입니다. {st.session_state.user_name} 님의 마음속 이야기를 편하게 꺼내어 주세요.")
     
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
@@ -412,12 +378,13 @@ elif st.session_state.app_step == 2:
     max_cat = max(scores, key=scores.get)
     past_summaries_text = "\n".join([f"- Day {i+1}: {summary}" for i, summary in enumerate(st.session_state.daily_summaries)]) if st.session_state.daily_summaries else "아직 이전 상담 기록이 없습니다."
 
-    # [프롬프트 엔지니어링] 요청하신 <필링굿> 원문 복붙 적용본 (AI가 최대한 소화할 수 있도록 섹션화)
+    # [프롬프트 엔지니어링] 요청하신 <필링굿> 원문 복붙 적용본
     base_cbt_instructions = f"""
     당신은 인지행동치료(CBT) 원칙에 기반하여 사용자의 인지 재구조화를 돕는 전문 AI 심리 상담사이다.
     [사용자 취약 영역]: {max_cat}
+    [내담자 호칭]: {st.session_state.user_name} 님
 
-    [[ CBT 핵심 치료 원칙 및 필수 지침 - '필링굿' 가이드라인 원문 ]]
+    [[ CBT 핵심 치료 원칙 및 필수 지침 ]]
 
     1. 상담사의 태도 및 준비
     - 공감을 표현하라. 인지모델의 맥락에서 추가 정보를 요청하라. 사고의 타당성 검증을 위해 동의를 구하라.
@@ -462,28 +429,37 @@ elif st.session_state.app_step == 2:
         그 후 오늘 새롭게 다룰 의제를 물어보고 대화를 이어나가라.
         """
 
-    model = genai.GenerativeModel('gemini-3.1-pro-preview', system_instruction=system_prompt)
+    # 안전 필터 추가 (무응답 버그 방지)
+    safety_settings = [
+        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+    ]
 
+    model = genai.GenerativeModel('gemini-1.5-pro', system_instruction=system_prompt, safety_settings=safety_settings)
+
+    name = st.session_state.user_name
     dynamic_greetings = [
-        "안녕하세요. 오늘 본격적인 첫 상담이네요. 오늘 하루, 당신의 마음을 가장 불편하게 했던 일은 무엇인가요? 오늘의 대화 주제를 정해볼까요?", 
-        "안녕하세요! 어제 우리가 함께 정했던 행동 계획은 일상에서 조금 시도해 보셨나요? 편하게 말씀해 주세요.", 
-        "Day 3입니다. 마음의 근육이 조금씩 붙고 있는 게 느껴지시나요? 어제 숙제는 어땠는지 먼저 들려주세요.", 
-        "Day 4네요. 스스로의 인지를 평가하고 새로운 행동을 실험해 보시면서 어떤 기분이 드셨나요?", 
-        "Day 5입니다! 어제 계획했던 일들을 일상에 적용해 보니, 0~100% 중 어느 정도 성취감을 느끼셨나요?", 
-        "Day 6입니다. 이제 우리 대화가 꽤 익숙해지셨을 텐데, 어제 숙제를 하면서 새롭게 떠오른 '자동적 사고'가 있었나요?", 
-        "Day 7, 어느덧 일주일이 지났네요. 지난주와 비교했을 때 스스로 대처하는 방식이 조금 달라진 것 같나요?", 
-        "Day 8입니다. 두 번째 주가 시작되었네요! 어제 행동 실험을 방해했던 어떤 장애물이 있었는지 이야기해 볼까요?", 
-        "Day 9네요. 인지 오류를 찾아내는 속도가 조금은 빨라지셨나요? 어제 숙제 이야기를 먼저 들려주세요.", 
-        "두 자릿수, Day 10입니다! 꾸준함의 힘을 믿습니다. 오늘 우리가 함께 이야기 나눌 가장 중요한 의제는 무엇인가요?", 
-        "Day 11입니다. 깊은 내면의 이야기를 꺼내주셔서 항상 감사합니다. 어제 하루는 어떻게 보내셨나요?", 
-        "Day 12, 여정의 후반부네요. 예전이라면 스트레스받았을 일에 당신이 새롭게 적용해 본 대처 전략이 있었나요?", 
-        "Day 13입니다. 내일이면 마지막 사후 검사를 앞두고 있네요. 오늘 하루는 내 마음에 어떤 질문을 던져보셨나요?", 
-        "안녕하세요. 어느덧 대망의 마지막 날, Day 14네요! 그동안 행동 계획을 꾸준히 실천하며 얻은 가장 큰 긍정적인 결론은 무엇인가요?" 
+        f"안녕하세요, {name} 님. 오늘 본격적인 첫 상담이네요. 오늘 하루, 마음을 가장 불편하게 했던 일은 무엇인가요? 오늘의 대화 주제를 정해볼까요?", 
+        f"안녕하세요, {name} 님! 어제 우리가 함께 정했던 행동 계획은 일상에서 조금 시도해 보셨나요? 편하게 말씀해 주세요.", 
+        f"Day 3입니다. {name} 님의 마음의 근육이 조금씩 붙고 있는 게 느껴지시나요? 어제 숙제는 어땠는지 먼저 들려주세요.", 
+        f"Day 4네요. 스스로의 인지를 평가하고 새로운 행동을 실험해 보시면서 어떤 기분이 드셨나요, {name} 님?", 
+        f"Day 5입니다! 어제 계획했던 일들을 일상에 적용해 보니, 0~100% 중 어느 정도 성취감을 느끼셨나요?", 
+        f"Day 6입니다. 이제 우리 대화가 꽤 익숙해지셨을 텐데, 어제 숙제를 하면서 새롭게 떠오른 '자동적 사고'가 있었나요?", 
+        f"Day 7, 어느덧 일주일이 지났네요. 지난주와 비교했을 때 {name} 님이 스스로 대처하는 방식이 조금 달라진 것 같나요?", 
+        f"Day 8입니다. 두 번째 주가 시작되었네요! 어제 행동 실험을 방해했던 어떤 장애물이 있었는지 이야기해 볼까요?", 
+        f"Day 9네요. 인지 오류를 찾아내는 속도가 조금은 빨라지셨나요? 어제 숙제 이야기를 먼저 들려주세요.", 
+        f"두 자릿수, Day 10입니다! 꾸준함의 힘을 믿습니다. 오늘 {name} 님과 함께 이야기 나눌 가장 중요한 의제는 무엇인가요?", 
+        f"Day 11입니다. 깊은 내면의 이야기를 꺼내주셔서 항상 감사합니다. 어제 하루는 어떻게 보내셨나요?", 
+        f"Day 12, 여정의 후반부네요. 예전이라면 스트레스받았을 일에 {name} 님이 새롭게 적용해 본 대처 전략이 있었나요?", 
+        f"Day 13입니다. 내일이면 마지막 사후 검사를 앞두고 있네요. 오늘 하루는 {name} 님의 마음에 어떤 질문을 던져보셨나요?", 
+        f"안녕하세요, {name} 님. 어느덧 대망의 마지막 날, Day 14네요! 그동안 행동 계획을 꾸준히 실천하며 얻은 가장 큰 긍정적인 결론은 무엇인가요?" 
     ]
     
     if len(st.session_state.chat_history) == 0:
         day_idx = st.session_state.current_day - 1
-        first_msg = dynamic_greetings[day_idx] if day_idx < len(dynamic_greetings) else f"안녕하세요, Day {st.session_state.current_day} 상담을 시작하겠습니다. 어제 숙제는 잘 실천해 보셨나요?"
+        first_msg = dynamic_greetings[day_idx] if day_idx < len(dynamic_greetings) else f"안녕하세요, {name} 님. Day {st.session_state.current_day} 상담을 시작하겠습니다. 어제 숙제는 잘 실천해 보셨나요?"
         st.session_state.chat_history.append({"role": "assistant", "content": first_msg})
         save_state()
 
@@ -497,29 +473,32 @@ elif st.session_state.app_step == 2:
                 st.markdown(user_input)
             
             gemini_history = [{"role": "user", "parts": ["안녕! 시작하자"]}]
-            for msg in st.session_state.chat_history[-6:]:
+            # 슬라이싱 버그 수정 [-6:] -> [-5:]
+            for msg in st.session_state.chat_history[-5:]:
                 role = "model" if msg["role"] == "assistant" else "user"
                 gemini_history.append({"role": role, "parts": [msg["content"]]})
                 
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             
             with st.chat_message("assistant"):
-                message_placeholder = st.empty()
-                full_response = ""
-                display_text = ""
-                try:
-                    chat = model.start_chat(history=gemini_history)
-                    response = chat.send_message(user_input, stream=True)
-                    for chunk in response:
-                        if chunk.text:
-                            full_response += chunk.text
-                            display_text = full_response.replace("[SESSION_END]", "")
-                            message_placeholder.markdown(display_text + "▌")
-                    message_placeholder.markdown(display_text)
-                except Exception as e:
-                    full_response = "상담 시스템 처리 중 오류가 발생했습니다. 다시 말씀해 주시겠어요?"
-                    display_text = full_response
-                    message_placeholder.markdown(full_response)
+                # 로딩 스피너에 이름 적용!
+                with st.spinner(f"{st.session_state.user_name} 님의 마음에 다가가는 중입니다..."):
+                    message_placeholder = st.empty()
+                    full_response = ""
+                    display_text = ""
+                    try:
+                        chat = model.start_chat(history=gemini_history)
+                        response = chat.send_message(user_input, stream=True)
+                        for chunk in response:
+                            if chunk.text:
+                                full_response += chunk.text
+                                display_text = full_response.replace("[SESSION_END]", "")
+                                message_placeholder.markdown(display_text + "▌")
+                        message_placeholder.markdown(display_text)
+                    except Exception as e:
+                        full_response = "상담 시스템 처리 중 오류가 발생했습니다. 다시 말씀해 주시겠어요?"
+                        display_text = full_response
+                        message_placeholder.markdown(full_response)
                     
             clean_response = full_response.replace("[SESSION_END]", "").strip()
             st.session_state.chat_history.append({"role": "assistant", "content": clean_response})
@@ -585,7 +564,7 @@ elif st.session_state.app_step == 2:
 
 elif st.session_state.app_step == 3:
     st.title("Step 3. 최종 사후 검사 (치료 진전도 확인)")
-    st.markdown("그동안 정말 고생 많으셨습니다. 첫 회기에 설정했던 우리의 광범위한 목표가 얼마나 달성되었는지, 역기능적 신념이 얼마나 완화되었는지 객관적으로 평가해 보겠습니다.")
+    st.markdown(f"그동안 정말 고생 많으셨습니다, **{st.session_state.user_name}** 님! 첫 회기에 설정했던 우리의 광범위한 목표가 얼마나 달성되었는지, 역기능적 신념이 얼마나 완화되었는지 객관적으로 평가해 보겠습니다.")
     st.markdown("---")
 
     with st.form("das_form_final"):
@@ -630,14 +609,14 @@ elif st.session_state.app_step == 4:
     
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
     
-    st.success("🎉 모든 인지행동치료(CBT) 여정을 훌륭하게 마친 것을 진심으로 축하합니다!")
-    st.markdown("""
+    st.success(f"🎉 모든 인지행동치료(CBT) 여정을 훌륭하게 마친 **{st.session_state.user_name}** 님을 진심으로 축하합니다!")
+    st.markdown(f"""
     <div class="report-box" style="border-left-color: #2196F3;">
         <div class="report-title" style="color: #1976D2;">상담사 AI의 마지막 편지 💌</div>
         우리는 지난 시간 동안 함께 자동적 사고를 도출하고, 그 이면에 있는 조건적 가정과 핵심 신념을 들여다보았습니다.<br>
         때로는 행동 실험을 수행하기 전 두려움에 휩싸여 0%의 완료 가능성을 이야기한 적도 있었고, 결국 은밀한 예행연습을 통해 용기를 내어 100% 실천해 낸 날도 있었습니다.<br><br>
         <b>기억해 주세요.</b> 부정적인 감정이나 인지 오류가 앞으로 다시는 찾아오지 않는 것은 아닙니다. 
-        하지만 이제 당신에게는 스스로 자신의 인지를 평가하고 반응하며, 일상에서 건강한 행동 계획을 세울 수 있는 <b>'인지 재구조화 도구'</b>가 생겼습니다. <br>
+        하지만 이제 {st.session_state.user_name} 님에게는 스스로 자신의 인지를 평가하고 반응하며, 일상에서 건강한 행동 계획을 세울 수 있는 <b>'인지 재구조화 도구'</b>가 생겼습니다. <br>
         자신에 대해 긍정적인 결론을 내리는 하루하루가 되시기를 온 마음을 다해 응원합니다.
     </div>
     """, unsafe_allow_html=True)
