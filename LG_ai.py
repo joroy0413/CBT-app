@@ -494,7 +494,7 @@ elif st.session_state.app_step == 2:
                                 message_placeholder.markdown(display_text + "▌")
                         message_placeholder.markdown(display_text)
                     except Exception as e:
-                       full_response = "상담 시스템 처리 중 오류가 발생했습니다. 다시 말씀해 주시겠어요?"
+                        full_response = "상담 시스템 처리 중 오류가 발생했습니다. 다시 말씀해 주시겠어요?"
                         display_text = full_response
                         message_placeholder.markdown(full_response)
                     
