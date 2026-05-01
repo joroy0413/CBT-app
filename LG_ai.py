@@ -437,7 +437,7 @@ elif st.session_state.app_step == 2:
         {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
     ]
 
-    model = genai.GenerativeModel('gemini-3.1-pro', system_instruction=system_prompt, safety_settings=safety_settings)
+    model = genai.GenerativeModel('gemini-3-pro', system_instruction=system_prompt, safety_settings=safety_settings)
 
     name = st.session_state.user_name
     dynamic_greetings = [
