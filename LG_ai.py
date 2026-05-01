@@ -305,7 +305,7 @@ if st.session_state.app_step == 0:
         with col1:
             target_days = st.slider("CBT 진행 기간을 선택하세요", min_value=7, max_value=14, value=7)
         with col2:
-            user_name = st.text_input("불리고 싶은 이름(닉네임)", placeholder="예: 다해")
+            user_name = st.text_input("불리고 싶은 이름(닉네임)", placeholder="")
         with col3:
             user_email = st.text_input("알림을 받을 이메일 주소", placeholder="example@gmail.com")
         
