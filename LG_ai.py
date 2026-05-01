@@ -437,7 +437,7 @@ elif st.session_state.app_step == 2:
         {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
     ]
 
-    model = genai.GenerativeModel('gemini-3-pro', system_instruction=system_prompt, safety_settings=safety_settings)
+    model = genai.GenerativeModel('gemini-2.5-pro', system_instruction=system_prompt, safety_settings=safety_settings)
 
     name = st.session_state.user_name
     dynamic_greetings = [
@@ -494,7 +494,7 @@ elif st.session_state.app_step == 2:
                                 message_placeholder.markdown(display_text + "▌")
                         message_placeholder.markdown(display_text)
                     except Exception as e:
-                        full_response = "상담 시스템 처리 중 오류가 발생했습니다. 다시 말씀해 주시겠어요?"
+                        full_response = f"🚨 시스템 에러 발생 (구글 API): {str(e)}"
                         display_text = full_response
                         message_placeholder.markdown(full_response)
                     
