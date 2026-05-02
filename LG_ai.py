@@ -22,12 +22,12 @@ def show_welcome_modal():
     st.markdown("""
     ### 🌿 CBT 자기분석 가이드에 오신 것을 환영합니다
     본 서비스는 **인지행동치료(CBT)** 원칙에 기반하여 설계된 AI 심리 케어 도구입니다.
-
-#### 1. 주요 개념 안내
+    
+    1. 주요 개념 안내
     1)   **CBT (인지행동치료)**: '상황' 자체가 아닌 그 상황을 바라보는 '나의 생각(인지)'이 감정과 행동을 결정한다는 원리에 기반한 치료법입니다. 
     2)   **DAS (역기능적 태도 척도)**: 개인이 가지고 있는 경직된 신념이나 가치관의 정도를 측정합니다. 점수가 높을수록 자신에게 엄격한 기준을 적용하고 있을 가능성이 큽니다.
 
-    #### 2. 이용 주의사항
+    2. 이용 주의사항
     1)   **의학적 진단 대체 불가**: 본 서비스는 전문의의 진단이나 치료를 대체할 수 없습니다. 자해/타해 위기 상황 시 즉시 전문 기관의 도움을 받으세요.
     2)   **데이터 보안**: 입력하신 모든 대화 내용은 상담의 연속성을 위해 Firebase 클라우드에 암호화되어 안전하게 저장됩니다.
     3)   **훈련 중심**: 단순한 위로를 넘어, 자신의 사고 오류를 찾아내고 일상에서 **'행동 숙제'**를 실천하는 능동적인 훈련 과정입니다.
@@ -654,7 +654,7 @@ elif st.session_state.app_step == 4:
                 데이터: {user_context}
                 """
                 
-                report_model = genai.GenerativeModel('gemini-1.5-pro') # 깊은 분석을 위해 Pro 모델 사용
+                report_model = genai.GenerativeModel('gemini-2.5-pro') # 깊은 분석을 위해 Pro 모델 사용
                 response = report_model.generate_content(report_prompt)
                 st.session_state.final_long_report = response.text
                 save_state()
