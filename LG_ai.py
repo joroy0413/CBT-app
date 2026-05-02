@@ -731,7 +731,7 @@ with col2:
 
 elif st.session_state.app_step == 3:
     st.title("Step 3. 다시 마주한 내면의 지도 🧭")
-    st.markdown(f"그동안 정말 고생 많으셨습니다, **{st.session_state.user_name}** 님! 첫 회기에 설정했던 우리의 광범위한 목표가 얼마나 달성되었는지, 굳어있던 신념이 얼마나 부드러워졌는지 편안한 마음으로 다시 평가해 보겠습니다.")
+    st.markdown(f"그동안 정말 고생 많으셨습니다, **{st.session_state.user_name}** 님!")
     st.markdown("---")
 
     with st.form("das_form_final"):
