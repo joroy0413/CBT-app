@@ -14,77 +14,156 @@ from google.cloud import firestore
 from google.oauth2 import service_account
 
 # ==========================================
-# 1. 페이지 및 UI 기본 설정
+# 1. 페이지 및 UI 기본 설정 (감성적인 테마 주입)
 # ==========================================
 st.set_page_config(page_title="CBT 자기분석 가이드", layout="centered", initial_sidebar_state="expanded")
 
-@st.dialog("사용 전 필수 주의사항")
-def show_welcome_modal():
-    st.markdown("""
-    ### 🌿 CBT 자기분석 가이드에 오신 것을 환영합니다
-    본 서비스는 **인지행동치료(CBT)** 원칙에 기반하여 설계된 AI 심리 케어 도구입니다.
-    
-    1. 주요 개념 안내
-    1)   **CBT (인지행동치료)**: '상황' 자체가 아닌 그 상황을 바라보는 '나의 생각(인지)'이 감정과 행동을 결정한다는 원리에 기반한 치료법입니다. 
-    2)   **DAS (역기능적 태도 척도)**: 개인이 가지고 있는 경직된 신념이나 가치관의 정도를 측정합니다. 점수가 높을수록 자신에게 엄격한 기준을 적용하고 있을 가능성이 큽니다.
-
-    2. 이용 주의사항
-    1)   **의학적 진단 대체 불가**: 본 서비스는 전문의의 진단이나 치료를 대체할 수 없습니다. 자해/타해 위기 상황 시 즉시 전문 기관의 도움을 받으세요.
-    2)   **데이터 보안**: 입력하신 모든 대화 내용은 상담의 연속성을 위해 Firebase 클라우드에 암호화되어 안전하게 저장되며, 제작자 또한 확인 불가합니다.
-    3)   **훈련 중심**: 단순한 위로를 넘어, 자신의 사고 오류를 찾아내고 일상에서 '행동 숙제'를 실천하는 능동적인 훈련 과정입니다.
-    4)   **질문이 다소 어려울 수 있습니다**: AI가 던지는 질문이나 과제가 평소 해보지 않던 생각들이라 당장 대답하기 어렵게 느껴질 수 있습니다. 이는 생각의 습관을 바꾸기 위한 실제 상담의 과정이니, 당황하지 마시고 천천히 깊게 고민한 후 나의 진짜 마음을 적어주세요.
-    """)
-    if st.button("확인 및 시작하기"):
-        st.session_state.show_modal = False
-        st.rerun()
-
+# 🎨 [핵심 변경] 마음이 편안해지는 심리 케어 앱 전용 커스텀 CSS 주입
 st.markdown("""
 <style>
-    /* 기본 챗봇 아바타 숨김 */
+    /* 1. 고급스럽고 편안한 웹 폰트 (프리텐다드) 적용 */
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    * { font-family: 'Pretendard', sans-serif !important; }
+
+    /* 2. 전체 배경색을 차가운 흰색에서 '따뜻한 크림 베이지'로 변경 */
+    .stApp {
+        background-color: #FAFAFA;
+    }
+    
+    /* 3. 챗봇 프로필 아이콘 숨기기 (깔끔한 UI 유지) */
     .stChatMessageAvatar { display: none; }
+
+    /* 4. AI 상담사 챗버블 (편안한 파스텔 민트) */
+    [data-testid="chatAvatarIcon-assistant"] + div {
+        background-color: #F0F4F2 !important; 
+        border-radius: 20px 20px 20px 4px !important;
+        padding: 15px 20px !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03) !important;
+        color: #2C3E50 !important;
+        line-height: 1.6 !important;
+    }
     
-    /* 기존 리포트 박스 (부드러운 색상으로 변경) */
-    .report-box { background-color: #F7F9F9; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #81C784; }
-    .report-title { color: #2E7D32; font-weight: bold; font-size: 1.1em; margin-bottom: 10px; }
+    /* 5. 내담자(사용자) 챗버블 (깔끔한 화이트 + 부드러운 그림자) */
+    [data-testid="chatAvatarIcon-user"] + div {
+        background-color: #FFFFFF !important;
+        border: 1px solid #EAEAEA !important;
+        border-radius: 20px 20px 4px 20px !important;
+        padding: 15px 20px !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03) !important;
+        color: #4A4A4A !important;
+    }
+
+    /* 6. 모든 버튼 디자인 둥글고 부드럽게 (호버 애니메이션 추가) */
+    .stButton>button {
+        border-radius: 12px !important;
+        border: none !important;
+        background-color: #81C784 !important; /* 편안한 자연의 그린 */
+        color: white !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        padding: 10px 24px !important;
+    }
+    .stButton>button:hover {
+        background-color: #66BB6A !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3) !important;
+    }
+
+    /* 7. 입력창, 슬라이더 부드럽게 */
+    .stTextInput>div>div>input {
+        border-radius: 12px !important;
+        border: 1px solid #E0E0E0 !important;
+        padding: 12px 15px !important;
+    }
+
+    /* 8. 탭(Tab) 메뉴 디자인 고급화 */
+    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        background-color: transparent;
+        border-radius: 10px 10px 0 0;
+        padding: 10px 20px;
+        color: #90A4AE;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #E8F5E9 !important;
+        color: #2E7D32 !important;
+        font-weight: bold;
+        border-bottom: 3px solid #81C784 !important;
+    }
+
+    /* 9. 심층 분석 리포트 박스 (세련된 음영과 은은한 선) */
+    .report-box { 
+        background: linear-gradient(145deg, #ffffff, #fdfdfd);
+        padding: 25px; 
+        border-radius: 16px; 
+        margin-bottom: 20px; 
+        border-left: 6px solid #A5D6A7; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        color: #424242;
+        line-height: 1.7;
+    }
+    .report-title { color: #2E7D32; font-weight: 800; font-size: 1.15em; margin-bottom: 12px; }
     
-    /* 🌿 심리 분석 인사이트 전용 박스 (안정감을 주는 파스텔 블루/민트) */
+    /* 10. AI 인사이트 박스 (안정감을 주는 파스텔 톤) */
     .insight-box {
-        background-color: #F0F7F4;
-        padding: 25px;
-        border-radius: 15px;
-        border-left: 5px solid #64B5F6;
-        color: #2C3E50;
-        line-height: 1.6;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-        margin-bottom: 20px;
+        background: linear-gradient(135deg, #F0F7F4, #E8F3EF);
+        padding: 30px;
+        border-radius: 20px;
+        border-left: 6px solid #81C784;
+        color: #37474F;
+        line-height: 1.7;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        margin-bottom: 25px;
     }
     
-    /* 💌 마지막 편지 전용 감성 디자인 (진짜 종이 질감 느낌) */
+    /* 11. 💌 진짜 편지지 같은 질감의 박스 */
     .letter-paper {
-        background-color: #FDFBF7;
-        padding: 40px;
-        border-radius: 8px;
-        border: 1px solid #E8E3D3;
-        box-shadow: 2px 4px 12px rgba(0,0,0,0.04);
-        color: #4A4A4A;
+        background-color: #FEFCF8;
+        background-image: radial-gradient(#E8E3D3 1px, transparent 1px);
+        background-size: 20px 20px; /* 은은한 도트 패턴 */
+        padding: 45px 40px;
+        border-radius: 12px;
+        border: 1px solid #EAE6D8;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        color: #5D554D;
         font-size: 1.05em;
-        line-height: 1.9;
-        margin-top: 10px;
-        margin-bottom: 20px;
+        line-height: 2.0;
+        margin-top: 15px;
+        margin-bottom: 25px;
     }
-    
-    /* 편지 제목 스타일 */
     .letter-title {
         color: #8D6E63;
-        font-weight: bold;
-        font-size: 1.3em;
-        margin-bottom: 15px;
+        font-weight: 800;
+        font-size: 1.35em;
+        margin-bottom: 25px;
         text-align: center;
-        border-bottom: 1px dashed #E8E3D3;
-        padding-bottom: 15px;
+        border-bottom: 2px dashed #E8E3D3;
+        padding-bottom: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
+
+@st.dialog("🛋️ 사용 전 필수 주의사항")
+def show_welcome_modal():
+    st.markdown("""
+    ### 🌿 마음을 돌보는 시간에 오신 것을 환영합니다
+    본 서비스는 **인지행동치료(CBT)** 원칙에 기반하여 설계된 다정한 AI 심리 케어 도구입니다.
+    
+    **1. 주요 개념 안내**
+    1)   **CBT (인지행동치료)**: '상황' 자체가 아닌 그 상황을 바라보는 '나의 생각(인지)'이 감정과 행동을 결정한다는 원리에 기반한 치료법입니다. 
+    2)   **DAS (역기능적 태도 척도)**: 개인이 가지고 있는 경직된 신념이나 가치관의 정도를 측정합니다. 점수가 높을수록 자신에게 엄격한 기준을 적용하고 있을 가능성이 큽니다.
+
+    **2. 이용 주의사항**
+    1)   **의학적 진단 대체 불가**: 본 서비스는 전문의의 진단이나 치료를 대체할 수 없습니다. 위기 상황 시 즉시 전문 기관의 도움을 받으세요.
+    2)   **데이터 보안**: 입력하신 모든 대화 내용은 상담의 연속성을 위해 클라우드에 안전하게 암호화되어 저장됩니다.
+    3)   **훈련 중심**: 단순한 위로를 넘어, 자신의 생각 오류를 찾아내고 일상에서 '행동 숙제'를 실천하는 능동적인 훈련입니다.
+    4)   **깊은 성찰의 시간**: AI가 던지는 질문이 평소 해보지 않던 생각들이라 대답하기 어려울 수 있습니다. 이는 생각의 습관을 바꾸기 위한 실제 상담의 과정이니, 당황하지 마시고 천천히 진짜 마음을 적어주세요.
+    """)
+    if st.button("내면의 지도 그리기 시작하기"):
+        st.session_state.show_modal = False
+        st.rerun()
+
 
 # --- Firebase DB 연결 함수 ---
 @st.cache_resource
@@ -147,15 +226,15 @@ if "initialized" not in st.session_state:
     st.session_state.yesterday_homework = "없음"
     st.session_state.session_ended = False
     st.session_state.daily_summaries = []
-    st.session_state.show_modal = True  # 팝업 노출 여부
-    st.session_state.final_long_report = "" # 최종 리포트 저장용
+    st.session_state.show_modal = True  
+    st.session_state.final_long_report = "" 
     st.session_state.initialized = True
 
 # --- 이메일 발송 함수 ---
 def send_cbt_email(user_email, day):
     try:
-        title = "오늘의 마음 점검 시간입니다"
-        content = f"오늘 하루는 어떠셨나요? 어제 받은 숙제를 실천해 보셨는지 대화를 나눠보세요."
+        title = f"🌿 Day {day} 마음 챙김 알림이 도착했습니다"
+        content = f"오늘 하루는 어떠셨나요? 어제 받은 행동 실험을 일상에서 실천해 보셨는지 AI 상담사와 대화를 나눠보세요."
         msg = MIMEText(content)
         msg['Subject'] = title
         msg['From'] = "aggang0923@gmail.com"
@@ -189,7 +268,7 @@ categories = {
 cbt_explanations_detailed = {
     "성취 강박": """
     <div class="report-box">
-        <div class="report-title">📌 심층 인지 오류 분석: 조건부 가치 부여와 당위적 사고</div>
+        <div class="report-title">📌 핵심 신념: 조건부 가치 부여와 당위적 사고</div>
         현재 내담자님의 내면 깊은 곳에는 <b>'무언가를 성취해 내야만 비로소 나는 가치 있는 인간이다'</b>라는 핵심 신념(Core Belief)이 강하게 자리 잡고 있습니다. 
         이는 인지행동치료에서 흔히 관찰되는 <b>'당위적 사고(Musts & Shoulds)'</b>와 <b>'흑백논리(All-or-Nothing Thinking)'</b>의 결합입니다. <br><br>
         성공과 성과가 있을 때는 자존감이 급격히 상승하지만, 목표에 미달하거나 예상치 못한 실패를 겪을 경우 그 사건을 단순히 '경험'으로 받아들이지 못하고 <b>'내 존재 자체의 무가치함'</b>으로 파국화(Catastrophizing)하는 경향이 짙습니다.
@@ -208,7 +287,7 @@ cbt_explanations_detailed = {
     """,
     "인정/승인 욕구": """
     <div class="report-box">
-        <div class="report-title">📌 심층 인지 오류 분석: 독심술과 타인 지향적 가치관</div>
+        <div class="report-title">📌 핵심 신념: 독심술과 타인 지향적 가치관</div>
         현재 내담자님은 감정과 자존감의 통제권을 '내'가 아닌 '타인'에게 양도한 상태입니다. 
         인지행동치료의 관점에서 이는 <b>'독심술(Mind-reading)'</b>과 <b>'개인화(Personalization)'</b> 오류가 두드러지는 상태입니다. <br><br>
         타인의 미세한 표정 변화, 메시지 답장 속도, 무심한 말 한마디를 나에 대한 부정적 평가로 지레짐작하며, '모두에게 사랑받아야만 한다'는 비현실적이고 경직된 조건적 가정(Conditional Assumption)을 지니고 있습니다.
@@ -227,7 +306,7 @@ cbt_explanations_detailed = {
     """,
     "완벽주의": """
     <div class="report-box">
-        <div class="report-title">📌 심층 인지 오류 분석: 흑백논리와 당위적 명제의 함정</div>
+        <div class="report-title">📌 핵심 신념: 흑백논리와 당위적 명제의 함정</div>
         자신(때로는 타인에게도)을 향해 몹시 가혹하고 엄격한 잣대를 들이대고 있습니다. 
         <b>'100점이 아니면 모두 0점 실패작이다'</b>라는 극단적인 <b>'이분법적 사고(Dichotomous Thinking)'</b>와 <b>'과도한 일반화(Overgeneralization)'</b>가 내면을 지배하고 있습니다.<br><br>
         "~해야만 한다", "~해서는 절대 안 된다"라는 무수한 당위적 명제들로 뇌의 유연성을 잃은 상태이며, 하나의 작은 오점이 전체의 가치를 훼손한다고 믿는 인지적 협착이 나타나고 있습니다.
@@ -246,7 +325,7 @@ cbt_explanations_detailed = {
     """,
     "의존성": """
     <div class="report-box">
-        <div class="report-title">📌 심층 인지 오류 분석: 파국화와 자기 효능감 저하</div>
+        <div class="report-title">📌 핵심 신념: 파국화와 자기 효능감 저하</div>
         삶의 난관이나 선택의 기로에 섰을 때, 자신의 판단력을 불신하고 타인(또는 절대적 존재)의 지지가 있어야만 안도하는 양상을 보입니다. 
         여기에는 최악의 시나리오를 지레짐작하는 <b>'파국화(Catastrophizing)'</b> 오류와 <b>'나의 대처 능력 과소평가(Minimization)'</b> 오류가 기저에 깔려 있습니다.<br><br>
         "나 혼자 결정했다가 잘못되면 나는 완전히 무너질 거야"라는 식의 두려움이 독립적인 문제 해결 능력을 억압하고 있습니다.
@@ -309,26 +388,28 @@ das_40_questions = [
 ]
 
 # ==========================================
-# 3. 항시 표출 사이드바 UI (언제든 DAS 확인 가능)
+# 3. 항시 표출 사이드바 UI
 # ==========================================
 if st.session_state.app_step >= 1 and st.session_state.initial_scores:
     with st.sidebar:
-        st.header("📊 나의 마음 기준선 (DAS-40)")
+        st.header("📊 나의 마음 기준선")
         scores = st.session_state.initial_scores
         df_side = pd.DataFrame(dict(r=list(scores.values()), theta=list(scores.keys())))
         df_side = pd.concat([df_side, df_side.iloc[[0]]], ignore_index=True)
         
         fig_side = px.line_polar(df_side, r='r', theta='theta', line_close=True, range_r=[0, 70])
-        fig_side.update_traces(fill='toself', fillcolor='rgba(255, 75, 75, 0.3)', line_color='red')
+        fig_side.update_traces(fill='toself', fillcolor='rgba(129, 199, 132, 0.4)', line_color='#66BB6A')
         fig_side.update_layout(
             polar=dict(radialaxis=dict(visible=False)),
             margin=dict(l=20, r=20, t=20, b=20),
-            dragmode=False
+            dragmode=False,
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)'
         )
         st.plotly_chart(fig_side, use_container_width=True, config={'displayModeBar': False})
         
         max_cat_side = max(scores, key=scores.get)
-        st.warning(f"🚨 **우선 주의 영역: {max_cat_side}**")
+        st.info(f"🌿 **우선 케어 영역: {max_cat_side}**")
         st.markdown(f"""
         **점수 요약:**
         - 성취 강박: {scores.get('성취 강박', 0)}점
@@ -349,9 +430,9 @@ if st.session_state.get("show_modal", True):
     show_welcome_modal()
 
 if st.session_state.app_step == 0:
-    st.title("Step 0. 내면의 지도 그리기")
+    st.title("Step 0. 내면의 지도 그리기 🗺️")
     
-    st.info("💡 **기존 참여자이신가요?** 진행 중인 이메일을 입력하시면 클라우드에서 이전 상담 기록을 불러옵니다.")
+    st.info("💡 **기존에 진행 중이신가요?** 이메일을 입력하시면 클라우드에서 이전 기록을 포근하게 불러옵니다.")
     col_em, col_btn = st.columns([3, 1])
     with col_em:
         load_email_input = st.text_input("진행 중인 이메일을 입력하세요.", label_visibility="collapsed")
@@ -364,31 +445,31 @@ if st.session_state.app_step == 0:
                 st.error("해당 이메일로 저장된 기록이 없습니다.")
                 
     st.markdown("---")
-    st.markdown("처음 오셨다면, 본격적인 대화에 앞서 **DAS-40 사전 검사**를 진행합니다. 깊은 생각보다 직관적으로 떠오르는 답변을 선택해 주세요.")
+    st.markdown("처음 오셨다면, 본격적인 대화에 앞서 **마음 기준선 검사(DAS-40)**를 진행합니다. 깊은 생각보다는 질문을 읽고 가장 먼저 떠오르는 직관적인 느낌을 선택해 주세요.")
 
     with st.form("das_form_initial"):
-        st.subheader("상담 목표 설정")
+        st.subheader("나의 여정 설정하기")
         col1, col2, col3 = st.columns(3)
         with col1:
-            target_days = st.slider("CBT 진행 기간을 선택하세요", min_value=7, max_value=14, value=7)
+            target_days = st.slider("여정 기간 (일)", min_value=7, max_value=14, value=7)
         with col2:
-            user_name = st.text_input("불리고 싶은 이름(닉네임)", placeholder="")
+            user_name = st.text_input("불리고 싶은 이름", placeholder="예: 다해")
         with col3:
-            user_email = st.text_input("알림을 받을 이메일 주소", placeholder="example@gmail.com")
+            user_email = st.text_input("안내를 받을 이메일", placeholder="example@gmail.com")
         
         st.markdown("---")
-        st.subheader("DAS-40 사전 문항")
+        st.subheader("마음의 소리 듣기 (40문항)")
         
         responses = []
         for i, question in enumerate(das_40_questions[:40]):
             ans = st.radio(f"**{i+1}. {question}**", options_7pt, index=None, horizontal=False)
             responses.append((i+1, ans))
             
-        submitted = st.form_submit_button("검사 완료 및 설정 저장")
+        submitted = st.form_submit_button("기록 완료 및 여정 시작하기")
             
         if submitted:
             if not user_name or not user_email:
-                st.error("이름(닉네임)과 진행 상황 저장을 위한 이메일 주소를 모두 입력해 주세요.")
+                st.error("이름과 진행 상황 저장을 위한 이메일 주소를 모두 채워주시면 출발할 수 있어요.")
             else:
                 st.session_state.user_name = user_name
                 st.session_state.target_days = target_days
@@ -409,8 +490,8 @@ if st.session_state.app_step == 0:
                 st.rerun()
 
 elif st.session_state.app_step == 1:
-    st.title("Step 1. 인지적 기준선 심층 분석 결과")
-    st.markdown(f"작성해주신 DAS-40 검사를 바탕으로 **{st.session_state.user_name}** 님의 마음 지형도를 분석했습니다. 아래의 그래프와 심층 분석 리포트를 꼼꼼히 읽어보세요.")
+    st.title("Step 1. 내면의 지형도 확인하기 🧭")
+    st.markdown(f"작성해주신 답변을 바탕으로 **{st.session_state.user_name}** 님의 마음 지형도를 그렸습니다. 아래의 심층 분석 리포트를 찬찬히 읽어보며 나를 이해하는 시간을 가져보세요.")
     
     scores = st.session_state.initial_scores
     max_cat = max(scores, key=scores.get)
@@ -419,25 +500,24 @@ elif st.session_state.app_step == 1:
     df = pd.concat([df, df.iloc[[0]]], ignore_index=True)
     
     fig = px.line_polar(df, r='r', theta='theta', line_close=True, range_r=[0, 70])
-    fig.update_traces(fill='toself', fillcolor='rgba(255, 75, 75, 0.2)', line_color='red')
-    fig.update_layout(dragmode=False, height=400) 
+    fig.update_traces(fill='toself', fillcolor='rgba(129, 199, 132, 0.4)', line_color='#66BB6A')
+    fig.update_layout(dragmode=False, height=400, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)') 
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
     
-    st.error(f"🚨 진단 결과: 현재 가장 집중적인 CBT 개입이 필요한 핵심 역기능적 신념은 **[{max_cat}]** 영역입니다.")
+    st.info(f"🌿 현재 **{st.session_state.user_name}** 님에게 가장 부드러운 케어가 필요한 영역은 **[{max_cat}]** 입니다.")
     st.markdown(cbt_explanations_detailed[max_cat], unsafe_allow_html=True)
     
     st.markdown("---")
-    st.markdown("💡 **안내:** 이 심층 분석 결과는 본격적인 상담 중 언제든지 좌측 사이드바(메뉴)를 열어 다시 확인할 수 있습니다.")
+    st.markdown("💡 **안내:** 이 분석 결과는 본격적인 대화 중 언제든지 좌측 메뉴를 열어 다시 꺼내어 볼 수 있습니다.")
     
-    if st.button("▶ Day 1 상담 및 인지 훈련 시작하기", use_container_width=True):
+    if st.button("▶ Day 1 따뜻한 대화 시작하기", use_container_width=True):
         st.session_state.app_step = 2
         save_state() 
         st.rerun()
 
-# --- 화면 C (Step 2): 프롬프트 챗봇 ---
 elif st.session_state.app_step == 2:
-    st.title(f"CBT 심리 가이드 - Day {st.session_state.current_day} / {st.session_state.target_days}")
-    st.caption(f"안전하고 따뜻한 공간입니다. {st.session_state.user_name} 님의 마음속 이야기를 편하게 꺼내어 주세요.")
+    st.title(f"마음 돌봄의 시간 - Day {st.session_state.current_day} / {st.session_state.target_days} ☕")
+    st.caption(f"안전하고 따뜻한 공간입니다. {st.session_state.user_name} 님의 마음속 이야기를 어떤 판단도 없이 편하게 꺼내어 주세요.")
     
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
@@ -445,9 +525,8 @@ elif st.session_state.app_step == 2:
     max_cat = max(scores, key=scores.get)
     past_summaries_text = "\n".join([f"- Day {i+1}: {summary}" for i, summary in enumerate(st.session_state.daily_summaries)]) if st.session_state.daily_summaries else "아직 이전 상담 기록이 없습니다."
 
-    # [프롬프트 엔지니어링] 
     base_cbt_instructions = f"""
-    당신은 인지행동치료(CBT) 원칙에 기반하여 사용자의 인지 재구조화를 돕는 전문 AI 심리 상담사이다.
+    당신은 인지행동치료(CBT) 원칙에 기반하여 사용자의 인지 재구조화를 돕는 전문적이고 다정한 AI 심리 상담사이다.
     [사용자 취약 영역]: {max_cat}
     [내담자 호칭]: {st.session_state.user_name} 님
 
@@ -496,7 +575,6 @@ elif st.session_state.app_step == 2:
         그 후 오늘 새롭게 다룰 의제를 물어보고 대화를 이어나가라.
         """
 
-    # 안전 필터 추가 (무응답 버그 방지)
     safety_settings = [
         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
         {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
@@ -508,25 +586,25 @@ elif st.session_state.app_step == 2:
 
     name = st.session_state.user_name
     dynamic_greetings = [
-        f"안녕하세요, {name} 님. 오늘 본격적인 첫 상담이네요. 오늘 하루, 마음을 가장 불편하게 했던 일은 무엇인가요? 오늘의 대화 주제를 정해볼까요?", 
-        f"안녕하세요, {name} 님! 어제 우리가 함께 정했던 행동 계획은 일상에서 조금 시도해 보셨나요? 편하게 말씀해 주세요.", 
-        f"Day 3입니다. {name} 님의 마음의 근육이 조금씩 붙고 있는 게 느껴지시나요? 어제 숙제는 어땠는지 먼저 들려주세요.", 
-        f"Day 4네요. 스스로의 인지를 평가하고 새로운 행동을 실험해 보시면서 어떤 기분이 드셨나요, {name} 님?", 
-        f"Day 5입니다! 어제 계획했던 일들을 일상에 적용해 보니, 0~100% 중 어느 정도 성취감을 느끼셨나요?", 
+        f"안녕하세요, {name} 님. 오늘 본격적인 첫 만남이네요. 오늘 하루, 마음을 가장 소란스럽게 했던 일은 무엇인가요? 편안하게 이야기의 문을 열어주세요.", 
+        f"안녕하세요, {name} 님! 어제 우리가 함께 정했던 행동 계획은 일상에서 조금이라도 시도해 보셨나요? 어떤 감정이 들었는지 편하게 말씀해 주세요.", 
+        f"벌써 Day 3입니다. {name} 님의 마음의 근육이 조금씩 꿈틀거리는 게 느껴지시나요? 어제 숙제는 어땠는지 먼저 들려주세요.", 
+        f"Day 4네요. 스스로의 인지를 한 걸음 떨어져서 바라보고 새로운 행동을 실험해 보시면서 어떤 기분이 드셨나요, {name} 님?", 
+        f"Day 5입니다! 어제 계획했던 일들을 일상에 적용해 보니, 0~100% 중 어느 정도 성취감을 느끼셨나요? 작아도 괜찮습니다.", 
         f"Day 6입니다. 이제 우리 대화가 꽤 익숙해지셨을 텐데, 어제 숙제를 하면서 새롭게 떠오른 '자동적 사고'가 있었나요?", 
-        f"Day 7, 어느덧 일주일이 지났네요. 지난주와 비교했을 때 {name} 님이 스스로 대처하는 방식이 조금 달라진 것 같나요?", 
-        f"Day 8입니다. 두 번째 주가 시작되었네요! 어제 행동 실험을 방해했던 어떤 장애물이 있었는지 이야기해 볼까요?", 
-        f"Day 9네요. 인지 오류를 찾아내는 속도가 조금은 빨라지셨나요? 어제 숙제 이야기를 먼저 들려주세요.", 
-        f"두 자릿수, Day 10입니다! 꾸준함의 힘을 믿습니다. 오늘 {name} 님과 함께 이야기 나눌 가장 중요한 의제는 무엇인가요?", 
-        f"Day 11입니다. 깊은 내면의 이야기를 꺼내주셔서 항상 감사합니다. 어제 하루는 어떻게 보내셨나요?", 
-        f"Day 12, 여정의 후반부네요. 예전이라면 스트레스받았을 일에 {name} 님이 새롭게 적용해 본 대처 전략이 있었나요?", 
-        f"Day 13입니다. 내일이면 마지막 사후 검사를 앞두고 있네요. 오늘 하루는 {name} 님의 마음에 어떤 질문을 던져보셨나요?", 
+        f"Day 7, 어느덧 일주일이 지났네요. 지난주 처음 만났을 때와 비교하면 {name} 님이 스스로 대처하는 방식이 조금 달라진 것 같나요?", 
+        f"Day 8입니다. 두 번째 주가 시작되었네요! 어제 행동 실험을 방해했던 마음속의 장애물이 있었는지 이야기해 볼까요?", 
+        f"Day 9네요. 내 마음속의 인지 오류를 알아채는 속도가 조금은 빨라지셨나요? 어제 숙제 이야기를 먼저 들려주세요.", 
+        f"두 자릿수, Day 10입니다! 꾸준함이 만드는 기적을 믿습니다. 오늘 {name} 님과 함께 이야기 나눌 가장 중요한 주제는 무엇인가요?", 
+        f"Day 11입니다. 깊은 내면의 이야기를 늘 용기 있게 꺼내주셔서 감사합니다. 어제 하루는 어떤 색깔이었나요?", 
+        f"Day 12, 여정의 후반부네요. 예전이라면 몹시 스트레스받았을 일에 {name} 님이 새롭게 적용해 본 대처 전략이 있었나요?", 
+        f"Day 13입니다. 내일이면 마지막 사후 검사를 앞두고 있네요. 오늘 하루는 {name} 님의 마음에 어떤 다정한 질문을 던져보셨나요?", 
         f"안녕하세요, {name} 님. 어느덧 대망의 마지막 날, Day 14네요! 그동안 행동 계획을 꾸준히 실천하며 얻은 가장 큰 긍정적인 결론은 무엇인가요?" 
     ]
     
     if len(st.session_state.chat_history) == 0:
         day_idx = st.session_state.current_day - 1
-        first_msg = dynamic_greetings[day_idx] if day_idx < len(dynamic_greetings) else f"안녕하세요, {name} 님. Day {st.session_state.current_day} 상담을 시작하겠습니다. 어제 숙제는 잘 실천해 보셨나요?"
+        first_msg = dynamic_greetings[day_idx] if day_idx < len(dynamic_greetings) else f"안녕하세요, {name} 님. Day {st.session_state.current_day} 만남을 시작하겠습니다. 어제 숙제는 잘 실천해 보셨나요?"
         st.session_state.chat_history.append({"role": "assistant", "content": first_msg})
         save_state()
 
@@ -547,7 +625,7 @@ elif st.session_state.app_step == 2:
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             
             with st.chat_message("assistant"):
-                with st.spinner(f"{st.session_state.user_name} 님의 마음에 다가가는 중입니다..."):
+                with st.spinner(f"차분히 {st.session_state.user_name} 님의 마음에 다가가는 중입니다..."):
                     message_placeholder = st.empty()
                     full_response = ""
                     display_text = ""
@@ -561,7 +639,7 @@ elif st.session_state.app_step == 2:
                                 message_placeholder.markdown(display_text + "▌")
                         message_placeholder.markdown(display_text)
                     except Exception as e:
-                        full_response = f"🚨 시스템 에러 발생 (구글 API): {str(e)}"
+                        full_response = f"🚨 시스템 연결이 원활하지 않습니다: {str(e)}"
                         display_text = full_response
                         message_placeholder.markdown(full_response)
                     
@@ -585,7 +663,7 @@ elif st.session_state.app_step == 2:
                 [오늘의 대화 기록] {chat_full_text}
                 """
                 
-                with st.spinner("오늘의 인지개념화를 정리하고 행동 계획을 기록하는 중입니다..."):
+                with st.spinner("오늘의 이야기를 다이어리에 조심스럽게 기록하고 있습니다..."):
                     try:
                         summary_model = genai.GenerativeModel('gemini-2.5-flash')
                         hw_response = summary_model.generate_content(summary_prompt)
@@ -601,45 +679,45 @@ elif st.session_state.app_step == 2:
                 st.rerun()
 
     else:
-        st.success(f"🎉 Day {st.session_state.current_day} 회기 목표 달성 및 상담 완료!")
-        st.info("오늘의 상담이 구조화된 일정에 따라 잘 마무리되었습니다. 내담자님과 합의한 행동 계획을 꼭 확인해 주세요.")
+        st.success(f"🎉 Day {st.session_state.current_day} 마음 돌봄 완료!")
+        st.info("오늘의 여정이 구조화된 일정에 따라 잘 마무리되었습니다. 합의한 일상 속 작은 실험을 꼭 확인해 주세요.")
         st.markdown(f"**📝 내일 일상에서 실험해 볼 과제 (완료 목표 100%):**\n> {st.session_state.yesterday_homework}")
         st.markdown("---")
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("내일의 나를 위한 이메일 알림 보내기 📧"):
+            if st.button("내일의 나를 위한 알림 보내기 📧"):
                 if send_cbt_email(st.session_state.user_email, st.session_state.current_day + 1):
                     st.toast("전송 성공! 내일 다시 만나요.")
                 else:
                     st.error("전송 실패")
         with col2:
             if st.session_state.current_day < st.session_state.target_days:
-                if st.button("다음 회기(Next Day)로 시간 점프하기 ⏭️"):
+                if st.button("다음 날의 여정으로 건너뛰기 ⏭️"):
                     st.session_state.current_day += 1
                     st.session_state.chat_history = [] 
                     st.session_state.session_ended = False
                     save_state() 
                     st.rerun()
             else:
-                if st.button("🏆 모든 일정 수료! 최종 사후 검사 진행하기"):
+                if st.button("🏆 모든 여정 수료! 사후 검사 진행하기"):
                     st.session_state.app_step = 3
                     save_state()
                     st.rerun()
 
 elif st.session_state.app_step == 3:
-    st.title("Step 3. 최종 사후 검사 (치료 진전도 확인)")
-    st.markdown(f"그동안 정말 고생 많으셨습니다, **{st.session_state.user_name}** 님! 첫 회기에 설정했던 우리의 광범위한 목표가 얼마나 달성되었는지, 역기능적 신념이 얼마나 완화되었는지 객관적으로 평가해 보겠습니다.")
+    st.title("Step 3. 다시 마주한 내면의 지도 🧭")
+    st.markdown(f"그동안 정말 고생 많으셨습니다, **{st.session_state.user_name}** 님! 첫 회기에 설정했던 우리의 광범위한 목표가 얼마나 달성되었는지, 굳어있던 신념이 얼마나 부드러워졌는지 편안한 마음으로 다시 평가해 보겠습니다.")
     st.markdown("---")
 
     with st.form("das_form_final"):
-        st.subheader("DAS-40 사후 문항")
+        st.subheader("마음의 소리 듣기 (사후 40문항)")
         responses = []
         for i, question in enumerate(das_40_questions[:40]):
             ans = st.radio(f"**{i+1}. {question}**", options_7pt, index=None, horizontal=False)
             responses.append((i+1, ans))
             
-        submitted = st.form_submit_button("사후 검사 완료 및 비교 리포트 보기")
+        submitted = st.form_submit_button("기록 완료 및 변화된 리포트 열어보기")
             
         if submitted:
             scores = {"성취 강박": 0, "인정/승인 욕구": 0, "완벽주의": 0, "의존성": 0}
@@ -656,12 +734,10 @@ elif st.session_state.app_step == 3:
             st.rerun()
 
 elif st.session_state.app_step == 4:
-    st.title("🏆 CBT 여정 수료 및 최종 리포트")
+    st.title("🏆 CBT 여정 수료 및 마침표")
     
-    # 🎈 수료 축하 애니메이션 효과
     st.balloons()
     
-    # --- 점수 변화 분석 로직 ---
     categories_list = list(st.session_state.initial_scores.keys())
     initial_vals = list(st.session_state.initial_scores.values())
     final_vals = list(st.session_state.final_scores.values())
@@ -679,51 +755,43 @@ elif st.session_state.app_step == 4:
         elif diff < 0:
             decreased_cats.append(cat)
 
-    # 점수 해석 동적 메시지 생성
     if total_diff <= -5:
-        score_interpretation = f"전체적으로 역기능적 신념 점수가 <b>{abs(total_diff)}점 감소</b>했습니다. 단기간에 이런 변화가 나타난 것은 {st.session_state.user_name} 님의 생각 습관이 훌륭하게 유연해졌다는 강력한 증거입니다!"
+        score_interpretation = f"전체적으로 무겁던 신념 점수가 <b>{abs(total_diff)}점이나 사르르 녹아내렸습니다.</b> 단기간에 이런 변화가 나타난 것은 {st.session_state.user_name} 님의 생각 습관이 훌륭하게 유연해졌다는 가장 확실하고 긍정적인 증거입니다!"
     elif total_diff > 0 or len(increased_cats) > 0:
-        score_interpretation = f"검사 결과, <b>{', '.join(increased_cats)}</b> 영역 등에서 일시적으로 점수가 오르거나 뒤섞인 양상이 나타났습니다.<br><br>걱정하지 마세요! 이는 마음 깊은 곳의 문제를 직면하면서 생기는 자연스러운 <b>'인지 부조화'</b> 과정입니다. 곪았던 상처에 소독약을 바르면 잠시 따가운 것과 같습니다."
+        score_interpretation = f"검사 결과, <b>{', '.join(increased_cats)}</b> 영역 등에서 점수가 오르거나 뒤섞인 양상이 나타났습니다.<br><br>하지만 전혀 걱정하지 마세요. 이는 마음 깊은 곳의 상처를 외면하지 않고 똑바로 직면하면서 생기는 자연스러운 <b>'인지 부조화'</b> 과정입니다. 곪았던 상처를 치료할 때 소독약이 닿아 잠시 따가운 것과 같은 아주 건강한 신호입니다."
     else:
-        score_interpretation = "점수에 극적인 변화는 없지만, 매일 자신의 마음을 관찰하고 기록했다는 사실 자체가 이미 가장 큰 변화의 시작입니다. 굳어진 신념이 말랑해지기까지는 조금 더 꾸준한 시간이 필요할 뿐입니다."
+        score_interpretation = "수치상으로 극적인 변화는 보이지 않을 수 있지만, 매일 자신의 마음을 관찰하고 일상에서 실험을 이어갔다는 사실 자체가 이미 가장 훌륭한 변화입니다. 오래도록 굳어진 콘크리트 같은 신념에 틈이 생기기 시작했으니, 앞으로 자신을 조금 더 다정하게 기다려 주세요."
 
-    # 그래프를 위한 데이터 마감 처리 (다각형 닫기)
     categories_list.append(categories_list[0])
     initial_vals.append(initial_vals[0])
     final_vals.append(final_vals[0])
 
-    # === 🗂️ 화면을 3개의 탭으로 분리 ===
-    tab1, tab2, tab3 = st.tabs(["📊 인지 변화 결과", "📝 심층 분석 리포트", "💌 마지막 편지"])
+    tab1, tab2, tab3 = st.tabs(["📊 마음 성장 결과", "📝 심층 분석 리포트", "💌 전하고 싶은 편지"])
 
-    # --- 탭 1: 인지 변화 결과 ---
     with tab1:
         st.subheader("나의 마음 성장 그래프")
-        st.markdown("첫날의 경직되어 있던 마음(회색)과 현재의 유연해진 마음(초록색)을 비교해 보세요. 면적이 줄어들수록 자신을 있는 그대로 수용하게 되었음을 의미합니다.")
+        st.markdown("첫날의 경직되어 있던 마음(회색 영역)과 현재의 유연해진 마음(초록색 영역)을 겹쳐서 비교해 보세요. 면적이 줄어들수록 '~해야만 한다'는 강박에서 벗어나 나를 편안하게 수용하게 되었음을 의미합니다.")
         
         fig = go.Figure()
-        # 🎨 눈이 편안한 차트 색상으로 변경
-        fig.add_trace(go.Scatterpolar(r=initial_vals, theta=categories_list, fill='toself', name='치료 전 (Day 1)', line_color='#BDBDBD', fillcolor='rgba(189, 189, 189, 0.4)'))
-        fig.add_trace(go.Scatterpolar(r=final_vals, theta=categories_list, fill='toself', name=f'치료 후 (Day {st.session_state.target_days})', line_color='#81C784', fillcolor='rgba(129, 199, 132, 0.5)'))
+        fig.add_trace(go.Scatterpolar(r=initial_vals, theta=categories_list, fill='toself', name='치료 전 (Day 1)', line_color='#BDBDBD', fillcolor='rgba(189, 189, 189, 0.3)'))
+        fig.add_trace(go.Scatterpolar(r=final_vals, theta=categories_list, fill='toself', name=f'치료 후 (Day {st.session_state.target_days})', line_color='#81C784', fillcolor='rgba(129, 199, 132, 0.6)'))
         fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 70])), showlegend=True, dragmode=False, height=500, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
         
-        # 🌿 커스텀 디자인된 인사이트 박스 적용
         st.markdown(f"""
         <div class="insight-box">
-            <b>💡 AI 상담사의 결과 해석</b><br><br>
+            <b>💡 상담사 AI가 분석한 변화의 의미</b><br><br>
             {score_interpretation}
         </div>
         """, unsafe_allow_html=True)
 
-    # --- 탭 2: 심층 분석 리포트 ---
     with tab2:
-        st.subheader("📋 상담 종결 심층 분석 보고서")
+        st.subheader("📋 여정 종결 심층 분석 보고서")
         
         if not st.session_state.final_long_report:
-            with st.spinner("전문 임상심리사의 관점으로 심층 리포트를 작성 중입니다... (약 10~20초 소요)"):
+            with st.spinner("전문가의 시선으로 그간의 대화 기록을 엮어 다정한 심층 리포트를 작성 중입니다... (약 10~20초 소요)"):
                 try:
                     user_context = f"내담자:{st.session_state.user_name}\n사전/사후점수:{st.session_state.initial_scores}/{st.session_state.final_scores}\n요약:{st.session_state.daily_summaries}"
-                    
                     report_prompt = f"""
                     당신은 임상심리사입니다. 아래 [양식]에 맞춰 내담자 데이터를 분석해 2,500자 이상의 리포트를 작성하세요.
                     내담자의 이름은 가장 처음에 "절대로" 넣지 말고, 작성자, 상담 기간, 작성일 등의 정보를 "절대로" 리포트에 넣지 말 것
@@ -738,7 +806,6 @@ elif st.session_state.app_step == 4:
 
                     데이터: {user_context}
                     """
-                    
                     report_model = genai.GenerativeModel('gemini-2.5-pro')
                     response = report_model.generate_content(report_prompt)
                     st.session_state.final_long_report = response.text
@@ -749,13 +816,9 @@ elif st.session_state.app_step == 4:
 
         if st.session_state.final_long_report:
             st.markdown(st.session_state.final_long_report)
-            st.download_button("📥 리포트 텍스트 파일로 저장하기", st.session_state.final_long_report, file_name="CBT_Report.txt")
+            st.download_button("📥 심층 분석 리포트 다운로드 (TXT)", st.session_state.final_long_report, file_name="Mind_Care_Report.txt")
 
-    # --- 탭 3: 마지막 편지 및 종료 ---
     with tab3:
-        st.subheader("수고하셨습니다 👏")
-        st.markdown(f"모든 인지행동치료(CBT) 여정을 훌륭하게 마친 **{st.session_state.user_name}** 님을 진심으로 축하합니다. 상담사 AI가 남긴 마지막 편지를 읽어보세요.")
-        
         if "farewell_letter" not in st.session_state:
             letters = [
                 f"""
@@ -791,11 +854,10 @@ elif st.session_state.app_step == 4:
             ]
             st.session_state.farewell_letter = random.choice(letters)
 
-        # 💌 진짜 편지 같은 UI 박스 안에 내용 출력
         st.markdown(f'<div class="letter-paper">{st.session_state.farewell_letter}</div>', unsafe_allow_html=True)
         
         st.divider()
-        if st.button("🚪 상담 서비스 완전히 종료하기", use_container_width=True, type="primary"):
+        if st.button("🚪 이만 따뜻한 방을 나서기 (서비스 종료)", use_container_width=True):
             clear_state()
             st.rerun()
 
