@@ -552,7 +552,7 @@ elif st.session_state.app_step == 2:
 
     4. 행동 계획(숙제) 설정 및 준수 강화
     - 좋은 행동 계획은 내담자가 다음을 수행할 수 있는 기회를 제공한다: 자신의 경험과 자신에 대해 긍정적인 결론을 내린다. 자신의 인지를 평가하고 수정한다. 새로운 행동들을 실험한다.
-    - 모든 사람에게 맞는 일률적인 one size fits all 행동 계획은 없다. 공동으로 행동 계획을 설정한다. 행동 계획을 어렵게 만들기보다는 더 쉽게 만든다.
+    - 모든 일에 맞는 일률적인 행동 계획은 없다. 공동으로 행동 계획을 설정한다. 행동 계획을 어렵게 만들기보다는 더 쉽게 만든다.
     - [완료 가능성 확인하기] 행동 계획을 세울 때 잠재적인 장애물을 예측하는 것이 중요하다. 가장 중요한 질문은 다음과 같다. "0~100%의 확률로, 이 작업을 수행할 가능성은 얼마나 되나요?"
     - [장애물을 예상하고 은밀하게 예행연습하기] 만약 90% 미만일 것이라고 확신한다면, "왜 당신은 50%가 아니라 75% 확신하나요?", "가능성을 95%로 만들기 위해 우리가 무엇을 할 수 있나요?"라고 물어보고 행동 계획을 더 쉽게 수정하라.
 
@@ -686,28 +686,6 @@ elif st.session_state.app_step == 2:
 
         is_special_user = st.session_state.user_email == "7901gabi@gmail.com"
 
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("내일의 나를 위한 이메일 알림 보내기 📧"):
-        if send_cbt_email(st.session_state.user_email, st.session_state.current_day + 1):
-            st.toast("전송 성공! 내일 다시 만나요.")
-        else:
-            st.error("전송 실패")
-
-with col2:
-    if st.session_state.current_day < st.session_state.target_days and not is_special_user:
-        if st.button("다음 회기(Next Day)로 시간 점프하기 ⏭️"):
-            st.session_state.current_day += 1
-            st.session_state.chat_history = [] 
-            st.session_state.session_ended = False
-            save_state() 
-            st.rerun()
-    else:
-        if st.button("🏆 최종 사후 검사 바로 진행하기"):
-            st.session_state.app_step = 3
-            save_state()
-            st.rerun()
-        
         col1, col2 = st.columns(2)
         with col1:
             if st.button("내일의 나를 위한 알림 보내기 📧"):
@@ -716,7 +694,7 @@ with col2:
                 else:
                     st.error("전송 실패")
         with col2:
-            if st.session_state.current_day < st.session_state.target_days:
+            if st.session_state.current_day < st.session_state.target_days and not is_special_user:
                 if st.button("다음 날의 여정으로 건너뛰기 ⏭️"):
                     st.session_state.current_day += 1
                     st.session_state.chat_history = [] 
@@ -724,14 +702,14 @@ with col2:
                     save_state() 
                     st.rerun()
             else:
-                if st.button("🏆 모든 여정 수료! 사후 검사 진행하기"):
+                if st.button("🏆 최종 사후 검사 바로 진행하기" if is_special_user else "🏆 모든 여정 수료! 사후 검사 진행하기"):
                     st.session_state.app_step = 3
                     save_state()
                     st.rerun()
 
 elif st.session_state.app_step == 3:
     st.title("Step 3. 다시 마주한 내면의 지도 🧭")
-    st.markdown(f"그동안 정말 고생 많으셨습니다, **{st.session_state.user_name}** 님!")
+    st.markdown(f"그동안 정말 고생 많으셨습니다, **{st.session_state.user_name}** 님! 첫 회기에 설정했던 우리의 광범위한 목표가 얼마나 달성되었는지, 역기능적 신념이 얼마나 완화되었는지 객관적으로 평가해 보겠습니다.")
     st.markdown("---")
 
     with st.form("das_form_final"):
