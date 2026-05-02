@@ -18,7 +18,7 @@ from google.oauth2 import service_account
 # ==========================================
 st.set_page_config(page_title="CBT 자기분석 가이드", layout="centered", initial_sidebar_state="expanded")
 
-# 🎨 [핵심 변경] 마음이 편안해지는 심리 케어 앱 전용 커스텀 CSS 주입
+# 🎨 마음이 편안해지는 심리 케어 앱 전용 커스텀 CSS 주입
 st.markdown("""
 <style>
     /* 1. 고급스럽고 편안한 웹 폰트 (프리텐다드) 적용 */
@@ -164,7 +164,6 @@ def show_welcome_modal():
         st.session_state.show_modal = False
         st.rerun()
 
-
 # --- Firebase DB 연결 함수 ---
 @st.cache_resource
 def get_db():
@@ -290,7 +289,7 @@ cbt_explanations_detailed = {
         <div class="report-title">📌 핵심 신념: 독심술과 타인 지향적 가치관</div>
         현재 내담자님은 감정과 자존감의 통제권을 '내'가 아닌 '타인'에게 양도한 상태입니다. 
         인지행동치료의 관점에서 이는 <b>'독심술(Mind-reading)'</b>과 <b>'개인화(Personalization)'</b> 오류가 두드러지는 상태입니다. <br><br>
-        타인의 미세한 표정 변화, 메시지 답장 속도, 무심한 말 한마디를 나에 대한 부정적 평가로 지레짐작하며, '모두에게 사랑받아야만 한다'는 비현실적이고 경직된 조건적 가정(Conditional Assumption)을 지니고 있습니다.
+        타인의 미세한 표정 변화, 메시지 답장 속도, 무심한 말 한마디를 나에 대한 부정적 평가로 지레짐작하며, '모두에게 사랑받아야만 연대할 수 있다'는 비현실적이고 경직된 조건적 가정(Conditional Assumption)을 지니고 있습니다.
     </div>
     <div class="report-box">
         <div class="report-title">🛠 일상 행동 및 감정 패턴 예측</div>
@@ -552,7 +551,7 @@ elif st.session_state.app_step == 2:
 
     4. 행동 계획(숙제) 설정 및 준수 강화
     - 좋은 행동 계획은 내담자가 다음을 수행할 수 있는 기회를 제공한다: 자신의 경험과 자신에 대해 긍정적인 결론을 내린다. 자신의 인지를 평가하고 수정한다. 새로운 행동들을 실험한다.
-    - 모든 일에 맞는 일률적인 행동 계획은 없다. 공동으로 행동 계획을 설정한다. 행동 계획을 어렵게 만들기보다는 더 쉽게 만든다.
+    - 모든 사람에게 맞는 일률적인 one size fits all 행동 계획은 없다. 공동으로 행동 계획을 설정한다. 행동 계획을 어렵게 만들기보다는 더 쉽게 만든다.
     - [완료 가능성 확인하기] 행동 계획을 세울 때 잠재적인 장애물을 예측하는 것이 중요하다. 가장 중요한 질문은 다음과 같다. "0~100%의 확률로, 이 작업을 수행할 가능성은 얼마나 되나요?"
     - [장애물을 예상하고 은밀하게 예행연습하기] 만약 90% 미만일 것이라고 확신한다면, "왜 당신은 50%가 아니라 75% 확신하나요?", "가능성을 95%로 만들기 위해 우리가 무엇을 할 수 있나요?"라고 물어보고 행동 계획을 더 쉽게 수정하라.
 
@@ -684,7 +683,8 @@ elif st.session_state.app_step == 2:
         st.markdown(f"**📝 내일 일상에서 실험해 볼 과제 (완료 목표 100%):**\n> {st.session_state.yesterday_homework}")
         st.markdown("---")
 
-        is_special_user = st.session_state.user_email == "7901gabi@gmail.com"
+        # 🔑 다해 님이 요청하신 테스트 계정 특별 권한
+        is_special_user = (st.session_state.user_email == "7901gabi@gmail.com")
 
         col1, col2 = st.columns(2)
         with col1:
@@ -693,16 +693,24 @@ elif st.session_state.app_step == 2:
                     st.toast("전송 성공! 내일 다시 만나요.")
                 else:
                     st.error("전송 실패")
+
         with col2:
-            if st.session_state.current_day < st.session_state.target_days and not is_special_user:
+            if st.session_state.current_day < st.session_state.target_days:
                 if st.button("다음 날의 여정으로 건너뛰기 ⏭️"):
                     st.session_state.current_day += 1
                     st.session_state.chat_history = [] 
                     st.session_state.session_ended = False
                     save_state() 
                     st.rerun()
+                
+                # 7901gabi@gmail.com 계정일 경우, 기간을 다 채우지 않아도 최종 검사로 바로 갈 수 있는 버튼 노출
+                if is_special_user:
+                    if st.button("🏆 [특별 권한] 바로 사후 검사 넘어가기"):
+                        st.session_state.app_step = 3
+                        save_state()
+                        st.rerun()
             else:
-                if st.button("🏆 최종 사후 검사 바로 진행하기" if is_special_user else "🏆 모든 여정 수료! 사후 검사 진행하기"):
+                if st.button("🏆 모든 여정 수료! 사후 검사 진행하기"):
                     st.session_state.app_step = 3
                     save_state()
                     st.rerun()
