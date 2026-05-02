@@ -683,6 +683,30 @@ elif st.session_state.app_step == 2:
         st.info("오늘의 여정이 구조화된 일정에 따라 잘 마무리되었습니다. 합의한 일상 속 작은 실험을 꼭 확인해 주세요.")
         st.markdown(f"**📝 내일 일상에서 실험해 볼 과제 (완료 목표 100%):**\n> {st.session_state.yesterday_homework}")
         st.markdown("---")
+
+        is_special_user = st.session_state.user_email == "7901gabi@gmail.com"
+
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("내일의 나를 위한 이메일 알림 보내기 📧"):
+        if send_cbt_email(st.session_state.user_email, st.session_state.current_day + 1):
+            st.toast("전송 성공! 내일 다시 만나요.")
+        else:
+            st.error("전송 실패")
+
+with col2:
+    if st.session_state.current_day < st.session_state.target_days and not is_special_user:
+        if st.button("다음 회기(Next Day)로 시간 점프하기 ⏭️"):
+            st.session_state.current_day += 1
+            st.session_state.chat_history = [] 
+            st.session_state.session_ended = False
+            save_state() 
+            st.rerun()
+    else:
+        if st.button("🏆 최종 사후 검사 바로 진행하기"):
+            st.session_state.app_step = 3
+            save_state()
+            st.rerun()
         
         col1, col2 = st.columns(2)
         with col1:
