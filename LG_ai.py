@@ -33,6 +33,7 @@ def show_welcome_modal():
     1)   **의학적 진단 대체 불가**: 본 서비스는 전문의의 진단이나 치료를 대체할 수 없습니다. 자해/타해 위기 상황 시 즉시 전문 기관의 도움을 받으세요.
     2)   **데이터 보안**: 입력하신 모든 대화 내용은 상담의 연속성을 위해 Firebase 클라우드에 암호화되어 안전하게 저장되며, 제작자 또한 확인 불가합니다.
     3)   **훈련 중심**: 단순한 위로를 넘어, 자신의 사고 오류를 찾아내고 일상에서 '행동 숙제'를 실천하는 능동적인 훈련 과정입니다.
+    4)   **깊은 성찰의 시간**: AI가 던지는 질문이나 과제가 평소 해보지 않던 생각들이라 당장 대답하기 어렵게 느껴질 수 있습니다. 이는 생각의 습관을 바꾸기 위한 실제 상담의 과정이니, 당황하지 마시고 천천히 깊게 고민한 후 나의 진짜 마음을 적어주세요.
     """)
     if st.button("확인 및 시작하기"):
         st.session_state.show_modal = False
@@ -616,61 +617,100 @@ elif st.session_state.app_step == 3:
             st.rerun()
 
 elif st.session_state.app_step == 4:
-    st.title("📈 나의 마음 성장 및 인지 변화 리포트")
-    st.markdown("첫날의 경직되어 있던 인지 도식(회색 영역)과 현재의 유연해진 인지 도식(초록색 영역)을 비교해 보세요. 면적이 줄어들수록 '당위적 사고'에서 벗어나 자신을 있는 그대로 수용하게 되었음을 의미합니다.")
+    st.title("🏆 CBT 여정 수료 및 최종 리포트")
     
+    # 🎈 수료 축하 애니메이션 효과
+    st.balloons()
+    
+    # --- 점수 변화 분석 로직 ---
     categories_list = list(st.session_state.initial_scores.keys())
     initial_vals = list(st.session_state.initial_scores.values())
     final_vals = list(st.session_state.final_scores.values())
     
+    total_initial = sum(initial_vals)
+    total_final = sum(final_vals)
+    total_diff = total_final - total_initial
+    
+    increased_cats = []
+    decreased_cats = []
+    for cat in categories_list:
+        diff = st.session_state.final_scores[cat] - st.session_state.initial_scores[cat]
+        if diff > 0:
+            increased_cats.append(cat)
+        elif diff < 0:
+            decreased_cats.append(cat)
+
+    # 점수 해석 동적 메시지 생성
+    if total_diff <= -5:
+        score_interpretation = f"전체적으로 역기능적 신념 점수가 **{abs(total_diff)}점 감소**했습니다. 단기간에 이런 변화가 나타난 것은 {st.session_state.user_name} 님의 생각 습관이 훌륭하게 유연해졌다는 강력한 증거입니다!"
+    elif total_diff > 0 or len(increased_cats) > 0:
+        score_interpretation = f"검사 결과, **{', '.join(increased_cats)}** 영역 등에서 일시적으로 점수가 오르거나 뒤섞인 양상이 나타났습니다. 걱정하지 마세요! 이는 마음 깊은 곳의 문제를 직면하면서 생기는 자연스러운 '인지 부조화' 과정입니다. 곪았던 상처에 소독약을 바르면 잠시 따가운 것과 같습니다."
+    else:
+        score_interpretation = "점수에 극적인 변화는 없지만, 매일 자신의 마음을 관찰하고 기록했다는 사실 자체가 이미 가장 큰 변화의 시작입니다. 굳어진 신념이 말랑해지기까지는 조금 더 꾸준한 시간이 필요할 뿐입니다."
+
+    # 그래프를 위한 데이터 마감 처리 (다각형 닫기)
     categories_list.append(categories_list[0])
     initial_vals.append(initial_vals[0])
     final_vals.append(final_vals[0])
-    
-    fig = go.Figure()
-    fig.add_trace(go.Scatterpolar(r=initial_vals, theta=categories_list, fill='toself', name='치료 전 (Day 1)', line_color='gray', fillcolor='rgba(128, 128, 128, 0.4)'))
-    fig.add_trace(go.Scatterpolar(r=final_vals, theta=categories_list, fill='toself', name=f'치료 후 (Day {st.session_state.target_days})', line_color='green', fillcolor='rgba(0, 255, 0, 0.4)'))
-    fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 70])), showlegend=True, dragmode=False, height=500)
-    
-    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-    st.divider()
-    st.subheader("📋 상담 종결 심층 분석 보고서")
+    # === 🗂️ 화면을 3개의 탭으로 분리 ===
+    tab1, tab2, tab3 = st.tabs(["📊 인지 변화 결과", "📝 심층 분석 리포트", "💌 마지막 편지"])
 
-    if not st.session_state.final_long_report:
-        with st.spinner("심층 리포트를 작성 중입니다..."):
-            try:
-                user_context = f"내담자:{st.session_state.user_name}\n사전/사후점수:{st.session_state.initial_scores}/{st.session_state.final_scores}\n요약:{st.session_state.daily_summaries}"
-                
-                # 정석 양식을 프롬프트에 직접 주입
-                report_prompt = f"""
-                당신은 임상심리사입니다. 아래 [양식]에 맞춰 내담자 데이터를 분석해 2,500자 이상의 리포트를 작성하세요.
-                내담자의 이름은 가장 처음에 "절대로" 넣지 말고, 작성자, 상담 기간, 작성일 등의 정보를 "절대로" 리포트에 넣지 말 것
-                내담자와의 대화 내용과 내담자의 DAS 검사 결과를 왜곡하지 말고, 정보를 있는 그대로 받아들일 것.
-                [분석 양식 (이 구조를 엄격히 따를 것)]
-                1. 종합 인지 개념화: 핵심 신념과 자동적 사고 분석
-                2. 상담 과정에서의 변화 양상: 초기-중기-종결기 태도 변화
-                3. 행동 실험 성과: 수행한 숙제들의 심리적 효과 평가
-                4. 향후 6개월 가이드: 일상 실천 과제 3가지 제안
-                5. 재발 방지 전략: 맞춤형 인지 재구조화 문구 가이드
-                6. 최종 소회: 내담자를 향한 진심 어린 응원
+    # --- 탭 1: 인지 변화 결과 ---
+    with tab1:
+        st.subheader("나의 마음 성장 그래프")
+        st.markdown("첫날의 경직되어 있던 인지 도식(회색 영역)과 현재의 유연해진 인지 도식(초록색 영역)을 비교해 보세요. 면적이 줄어들수록 '당위적 사고'에서 벗어나 자신을 있는 그대로 수용하게 되었음을 의미합니다.")
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatterpolar(r=initial_vals, theta=categories_list, fill='toself', name='치료 전 (Day 1)', line_color='gray', fillcolor='rgba(128, 128, 128, 0.4)'))
+        fig.add_trace(go.Scatterpolar(r=final_vals, theta=categories_list, fill='toself', name=f'치료 후 (Day {st.session_state.target_days})', line_color='green', fillcolor='rgba(0, 255, 0, 0.4)'))
+        fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 70])), showlegend=True, dragmode=False, height=500)
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        
+        # 동적 점수 해석 출력
+        st.success(f"**💡 AI 상담사의 결과 해석:**\n\n{score_interpretation}")
 
-                데이터: {user_context}
-                """
-                
-                report_model = genai.GenerativeModel('gemini-2.5-pro') # 깊은 분석을 위해 Pro 모델 사용
-                response = report_model.generate_content(report_prompt)
-                st.session_state.final_long_report = response.text
-                save_state()
-                st.rerun()
-            except Exception as e:
-                st.error(f"리포트 생성 실패: {e}")
+    # --- 탭 2: 심층 분석 리포트 ---
+    with tab2:
+        st.subheader("📋 상담 종결 심층 분석 보고서")
+        
+        if not st.session_state.final_long_report:
+            with st.spinner("전문 임상심리사의 관점으로 심층 리포트를 작성 중입니다... (약 10~20초 소요)"):
+                try:
+                    user_context = f"내담자:{st.session_state.user_name}\n사전/사후점수:{st.session_state.initial_scores}/{st.session_state.final_scores}\n요약:{st.session_state.daily_summaries}"
+                    
+                    report_prompt = f"""
+                    당신은 임상심리사입니다. 아래 [양식]에 맞춰 내담자 데이터를 분석해 2,500자 이상의 리포트를 작성하세요.
+                    내담자의 이름은 가장 처음에 "절대로" 넣지 말고, 작성자, 상담 기간, 작성일 등의 정보를 "절대로" 리포트에 넣지 말 것
+                    내담자와의 대화 내용과 내담자의 DAS 검사 결과를 왜곡하지 말고, 정보를 있는 그대로 받아들일 것.
+                    [분석 양식 (이 구조를 엄격히 따를 것)]
+                    1. 종합 인지 개념화: 핵심 신념과 자동적 사고 분석
+                    2. 상담 과정에서의 변화 양상: 초기-중기-종결기 태도 변화
+                    3. 행동 실험 성과: 수행한 숙제들의 심리적 효과 평가
+                    4. 향후 6개월 가이드: 일상 실천 과제 3가지 제안
+                    5. 재발 방지 전략: 맞춤형 인지 재구조화 문구 가이드
+                    6. 최종 소회: 내담자를 향한 진심 어린 응원
 
-    # 화면에 출력
-    if st.session_state.final_long_report:
-        st.markdown(st.session_state.final_long_report)
-        st.download_button("📥 리포트 저장", st.session_state.final_long_report, file_name="CBT_Report.txt")
-    
+                    데이터: {user_context}
+                    """
+                    
+                    report_model = genai.GenerativeModel('gemini-2.5-pro')
+                    response = report_model.generate_content(report_prompt)
+                    st.session_state.final_long_report = response.text
+                    save_state()
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"리포트 생성 실패: {e}")
+
+        if st.session_state.final_long_report:
+            st.markdown(st.session_state.final_long_report)
+            st.download_button("📥 리포트 텍스트 파일로 저장하기", st.session_state.final_long_report, file_name="CBT_Report.txt")
+
+    # --- 탭 3: 마지막 편지 및 종료 ---
+    with tab3:
+        st.subheader("수고하셨습니다 👏")
+        st.markdown(f"모든 인지행동치료(CBT) 여정을 훌륭하게 마친 **{st.session_state.user_name}** 님을 진심으로 축하합니다. 상담사 AI가 남긴 마지막 편지를 읽어보세요.")
+        
         if "farewell_letter" not in st.session_state:
             letters = [
                 f"""
@@ -710,10 +750,9 @@ elif st.session_state.app_step == 4:
             ]
             st.session_state.farewell_letter = random.choice(letters)
 
-        # 선택된 랜덤 편지 출력
         st.info(st.session_state.farewell_letter)
-
-if __name__ == "__main__":
-    if not runtime.exists():
-        subprocess.run([sys.executable, "-m", "streamlit", "run", __file__])
-        sys.exit()
+        
+        st.divider()
+        if st.button("🚪 상담 서비스 완전히 종료하기", use_container_width=True, type="primary"):
+            clear_state()
+            st.rerun()
