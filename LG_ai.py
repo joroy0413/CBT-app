@@ -21,39 +21,32 @@ st.set_page_config(page_title="CBT 자기분석 가이드", layout="centered", i
 # 🎨 마음이 편안해지는 심리 케어 앱 전용 커스텀 CSS 주입
 st.markdown("""
 <style>
-    /* 1. 고급스럽고 편안한 웹 폰트 (프리텐다드) 적용 */
+    /* 1. 폰트 (프리텐다드) 적용 */
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
     * { font-family: 'Pretendard', sans-serif !important; }
 
-    /* 2. 전체 배경색을 차가운 흰색에서 '따뜻한 크림 베이지'로 변경 */
+    /* 2. 배경색 */
     .stApp {
         background-color: #FAFAFA;
     }
     
-    /* 3. 챗봇 프로필 아이콘 숨기기 (깔끔한 UI 유지) */
-    .stChatMessageAvatar { display: none; }
-
-    /* 4. AI 상담사 챗버블 (편안한 파스텔 민트) */
-    [data-testid="chatAvatarIcon-assistant"] + div {
-        background-color: #F0F4F2 !important; 
-        border-radius: 20px 20px 20px 4px !important;
-        padding: 15px 20px !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03) !important;
-        color: #2C3E50 !important;
-        line-height: 1.6 !important;
-    }
-    
-    /* 5. 내담자(사용자) 챗버블 (깔끔한 화이트 + 부드러운 그림자) */
-    [data-testid="chatAvatarIcon-user"] + div {
+    /* 3. 챗버블  */
+    [data-testid="stChatMessageContent"] {
         background-color: #FFFFFF !important;
         border: 1px solid #EAEAEA !important;
-        border-radius: 20px 20px 4px 20px !important;
+        border-radius: 20px !important;
         padding: 15px 20px !important;
         box-shadow: 0 2px 10px rgba(0,0,0,0.03) !important;
-        color: #4A4A4A !important;
+        color: #424242 !important;
+        line-height: 1.6 !important;
+
+    /* 4. 프로필 이미지  */
+    [data-testid="stChatMessageAvatarEmoji"] {
+        background-color: transparent !important;
+        font-size: 1.6rem !important;
     }
 
-    /* 6. 모든 버튼 디자인 둥글고 부드럽게 (호버 애니메이션 추가) */
+    /* 5. 호버 애니메이션 */
     .stButton>button {
         border-radius: 12px !important;
         border: none !important;
@@ -69,14 +62,14 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3) !important;
     }
 
-    /* 7. 입력창, 슬라이더 부드럽게 */
+    /* 6. 입력창 */
     .stTextInput>div>div>input {
         border-radius: 12px !important;
         border: 1px solid #E0E0E0 !important;
         padding: 12px 15px !important;
     }
 
-    /* 8. 탭(Tab) 메뉴 디자인 고급화 */
+    /* 7. 탭(Tab) 메뉴 디자인 */
     .stTabs [data-baseweb="tab-list"] { gap: 10px; }
     .stTabs [data-baseweb="tab"] {
         height: 50px;
@@ -92,7 +85,7 @@ st.markdown("""
         border-bottom: 3px solid #81C784 !important;
     }
 
-    /* 9. 심층 분석 리포트 박스 (세련된 음영과 은은한 선) */
+    /* 8. 심층 분석 리포트 박스  */
     .report-box { 
         background: linear-gradient(145deg, #ffffff, #fdfdfd);
         padding: 25px; 
@@ -105,7 +98,7 @@ st.markdown("""
     }
     .report-title { color: #2E7D32; font-weight: 800; font-size: 1.15em; margin-bottom: 12px; }
     
-    /* 10. AI 인사이트 박스 (안정감을 주는 파스텔 톤) */
+    /* 9. AI 인사이트 박스  */
     .insight-box {
         background: linear-gradient(135deg, #F0F7F4, #E8F3EF);
         padding: 30px;
@@ -117,7 +110,7 @@ st.markdown("""
         margin-bottom: 25px;
     }
     
-    /* 11. 💌 진짜 편지지 같은 질감의 박스 */
+    /* 10. 편지  */
     .letter-paper {
         background-color: #FEFCF8;
         background-image: radial-gradient(#E8E3D3 1px, transparent 1px);
