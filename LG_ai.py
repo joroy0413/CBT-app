@@ -18,19 +18,24 @@ from google.oauth2 import service_account
 # ==========================================
 st.set_page_config(page_title="CBT 자기분석 가이드", layout="centered", initial_sidebar_state="expanded")
 
-# 🎨 마음이 편안해지는 심리 케어 앱 전용 커스텀 CSS 주입
+# 아이콘 깨짐 방지
 st.markdown("""
 <style>
-    /* 1. 폰트 (프리텐다드) 적용 */
+    /* 1. 웹 폰트 */
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-    * { font-family: 'Pretendard', sans-serif !important; }
+    * { font-family: 'Pretendard', sans-serif; }
+    
+    /* smart_toy, keyboard_double 글씨 깨짐 방지 (스트림릿 기본 아이콘 복구) */
+    .material-symbols-rounded, .material-icons {
+        font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+    }
 
-    /* 2. 배경색 */
+    /* 2. 전체 배경색 */
     .stApp {
         background-color: #FAFAFA;
     }
     
-    /* 3. 챗버블  */
+    /* 3. 챗버블(메시지 내용) 공통 스타일 */
     [data-testid="stChatMessageContent"] {
         background-color: #FFFFFF !important;
         border: 1px solid #EAEAEA !important;
@@ -39,18 +44,19 @@ st.markdown("""
         box-shadow: 0 2px 10px rgba(0,0,0,0.03) !important;
         color: #424242 !important;
         line-height: 1.6 !important;
+    }
 
-    /* 4. 프로필 이미지  */
+    /* 4. 프로필 이모지 배경 투명하게 */
     [data-testid="stChatMessageAvatarEmoji"] {
         background-color: transparent !important;
         font-size: 1.6rem !important;
     }
 
-    /* 5. 호버 애니메이션 */
+    /* 5. 모든 버튼 디자인 둥글고 부드럽게 */
     .stButton>button {
         border-radius: 12px !important;
         border: none !important;
-        background-color: #81C784 !important; /* 편안한 자연의 그린 */
+        background-color: #81C784 !important;
         color: white !important;
         font-weight: 600 !important;
         transition: all 0.3s ease !important;
@@ -62,7 +68,7 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3) !important;
     }
 
-    /* 6. 입력창 */
+    /* 6. 입력창, 슬라이더 부드럽게 */
     .stTextInput>div>div>input {
         border-radius: 12px !important;
         border: 1px solid #E0E0E0 !important;
@@ -85,7 +91,7 @@ st.markdown("""
         border-bottom: 3px solid #81C784 !important;
     }
 
-    /* 8. 심층 분석 리포트 박스  */
+    /* 8. 심층 분석 리포트 박스 */
     .report-box { 
         background: linear-gradient(145deg, #ffffff, #fdfdfd);
         padding: 25px; 
@@ -110,11 +116,11 @@ st.markdown("""
         margin-bottom: 25px;
     }
     
-    /* 10. 편지  */
+    /* 10. 편지 */
     .letter-paper {
         background-color: #FEFCF8;
         background-image: radial-gradient(#E8E3D3 1px, transparent 1px);
-        background-size: 20px 20px; /* 은은한 도트 패턴 */
+        background-size: 20px 20px;
         padding: 45px 40px;
         border-radius: 12px;
         border: 1px solid #EAE6D8;
@@ -282,7 +288,7 @@ cbt_explanations_detailed = {
         <div class="report-title">📌 핵심 신념: 독심술과 타인 지향적 가치관</div>
         현재 내담자님은 감정과 자존감의 통제권을 '내'가 아닌 '타인'에게 양도한 상태입니다. 
         인지행동치료의 관점에서 이는 <b>'독심술(Mind-reading)'</b>과 <b>'개인화(Personalization)'</b> 오류가 두드러지는 상태입니다. <br><br>
-        타인의 미세한 표정 변화, 메시지 답장 속도, 무심한 말 한마디를 나에 대한 부정적 평가로 지레짐작하며, '모두에게 사랑받아야만 연대할 수 있다'는 비현실적이고 경직된 조건적 가정(Conditional Assumption)을 지니고 있습니다.
+        타인의 미세한 표정 변화, 메시지 답장 속도, 무심한 말 한마디를 나에 대한 부정적 평가로 지레짐작하며, '모두에게 사랑받아야만 한다'는 비현실적이고 경직된 조건적 가정(Conditional Assumption)을 지니고 있습니다.
     </div>
     <div class="report-box">
         <div class="report-title">🛠 일상 행동 및 감정 패턴 예측</div>
@@ -600,13 +606,15 @@ elif st.session_state.app_step == 2:
         st.session_state.chat_history.append({"role": "assistant", "content": first_msg})
         save_state()
 
+    # 🔴 [오류 수정] 챗봇 아바타를 예쁜 풀잎과 하트 이모지로 대체합니다! 
     for message in st.session_state.chat_history:
-        with st.chat_message(message["role"]):
+        avatar_icon = "🌿" if message["role"] == "assistant" else "🤍"
+        with st.chat_message(message["role"], avatar=avatar_icon):
             st.markdown(message["content"])
 
     if not st.session_state.session_ended:
         if user_input := st.chat_input("당신의 생각과 감정을 자유롭게 적어주세요..."):
-            with st.chat_message("user"):
+            with st.chat_message("user", avatar="🤍"):
                 st.markdown(user_input)
             
             gemini_history = [{"role": "user", "parts": ["안녕! 시작하자"]}]
@@ -616,7 +624,7 @@ elif st.session_state.app_step == 2:
                 
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             
-            with st.chat_message("assistant"):
+            with st.chat_message("assistant", avatar="🌿"):
                 with st.spinner(f"차분히 {st.session_state.user_name} 님의 마음에 다가가는 중입니다..."):
                     message_placeholder = st.empty()
                     full_response = ""
@@ -676,8 +684,7 @@ elif st.session_state.app_step == 2:
         st.markdown(f"**📝 내일 일상에서 실험해 볼 과제 (완료 목표 100%):**\n> {st.session_state.yesterday_homework}")
         st.markdown("---")
 
-        # 🔑 다해 님이 요청하신 테스트 계정 특별 권한
-        is_special_user = (st.session_state.user_email == "7901gabi@gmail.com")
+        is_special_user = st.session_state.user_email == "7901gabi@gmail.com"
 
         col1, col2 = st.columns(2)
         with col1:
