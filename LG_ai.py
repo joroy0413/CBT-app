@@ -17,6 +17,20 @@ from google.oauth2 import service_account
 # ==========================================
 st.set_page_config(page_title="CBT 자기분석 가이드", layout="centered", initial_sidebar_state="expanded")
 
+@st.dialog("사용 전 필수 주의사항")
+def show_welcome_modal():
+    st.markdown("""
+    ### 🌿 CBT 자기분석 가이드에 오신 것을 환영합니다
+    본 서비스는 **인지행동치료(CBT)** 원칙에 기반하여 설계된 AI 심리 케어 도구입니다.
+
+    1. **의학적 진단 대체 불가**: 전문의의 진단이나 치료를 대체할 수 없습니다. 위기 상황 시 전문 기관의 도움을 받으세요.
+    2. **데이터 보안**: 대화 내용은 상담 연속성을 위해 클라우드에 암호화 저장됩니다.
+    3. **진행 방식**: 단순히 대화만 하는 것이 아니라, 사고를 교정하는 **'훈련'** 과정입니다. 부여되는 숙제에 적극 참여해 주세요.
+    """)
+    if st.button("확인 및 시작하기"):
+        st.session_state.show_modal = False
+        st.rerun()
+
 st.markdown("""
 <style>
     .stChatMessageAvatar { display: none; }
@@ -84,7 +98,9 @@ if "initialized" not in st.session_state:
     st.session_state.user_email = ""
     st.session_state.yesterday_homework = "없음"
     st.session_state.session_ended = False
-    st.session_state.daily_summaries = [] 
+    st.session_state.daily_summaries = []
+    st.session_state.show_modal = True  # 팝업 노출 여부
+    st.session_state.final_long_report = "" # 최종 리포트 저장용
     st.session_state.initialized = True
 
 # --- 이메일 발송 함수 ---
@@ -280,6 +296,9 @@ if st.session_state.app_step >= 1 and st.session_state.initial_scores:
 # ==========================================
 # 4. 메인 화면 로직 (Step 0 ~ 4)
 # ==========================================
+
+if st.session_state.get("show_modal", True):
+    show_welcome_modal()
 
 if st.session_state.app_step == 0:
     st.title("Step 0. 내면의 지도 그리기")
@@ -606,6 +625,26 @@ elif st.session_state.app_step == 4:
     fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 70])), showlegend=True, dragmode=False, height=500)
     
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+    st.divider()
+    st.subheader("📋 상담 종결 심층 분석 보고서")
+
+    if not st.session_state.final_long_report:
+        with st.spinner("7일간의 대화를 분석하여 심층 리포트를 작성 중입니다..."):
+            try:
+                analysis_data = f"내담자: {st.session_state.user_name}\n요약: {st.session_state.daily_summaries}"
+                long_report_prompt = f"당신은 임상심리사입니다. 다음 데이터를 바탕으로 종결 리포트를 2,500자 이상 상세히 작성하세요: {analysis_data}"
+                
+                report_model = genai.GenerativeModel('gemini-2.5-flash')
+                response = report_model.generate_content(long_report_prompt)
+                st.session_state.final_long_report = response.text
+                save_state()
+            except:
+                st.error("리포트 생성 중 오류가 발생했습니다.")
+
+    if st.session_state.final_long_report:
+        st.markdown(st.session_state.final_long_report)
+        st.download_button("📥 리포트 다운로드", st.session_state.final_long_report, file_name="CBT_Report.txt")
     
     st.success(f"🎉 모든 인지행동치료(CBT) 여정을 훌륭하게 마친 **{st.session_state.user_name}** 님을 진심으로 축하합니다!")
     st.markdown(f"""
