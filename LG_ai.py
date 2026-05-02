@@ -23,9 +23,14 @@ def show_welcome_modal():
     ### 🌿 CBT 자기분석 가이드에 오신 것을 환영합니다
     본 서비스는 **인지행동치료(CBT)** 원칙에 기반하여 설계된 AI 심리 케어 도구입니다.
 
-    1. **의학적 진단 대체 불가**: 전문의의 진단이나 치료를 대체할 수 없습니다. 위기 상황 시 전문 기관의 도움을 받으세요.
-    2. **데이터 보안**: 대화 내용은 상담 연속성을 위해 클라우드에 암호화 저장됩니다.
-    3. **진행 방식**: 단순히 대화만 하는 것이 아니라, 사고를 교정하는 **'훈련'** 과정입니다. 부여되는 숙제에 적극 참여해 주세요.
+#### 1. 주요 개념 안내
+    1)   **CBT (인지행동치료)**: '상황' 자체가 아닌 그 상황을 바라보는 '나의 생각(인지)'이 감정과 행동을 결정한다는 원리에 기반한 치료법입니다. 
+    2)   **DAS (역기능적 태도 척도)**: 개인이 가지고 있는 경직된 신념이나 가치관의 정도를 측정합니다. 점수가 높을수록 자신에게 엄격한 기준을 적용하고 있을 가능성이 큽니다.
+
+    #### 2. 이용 주의사항
+    1)   **의학적 진단 대체 불가**: 본 서비스는 전문의의 진단이나 치료를 대체할 수 없습니다. 자해/타해 위기 상황 시 즉시 전문 기관의 도움을 받으세요.
+    2)   **데이터 보안**: 입력하신 모든 대화 내용은 상담의 연속성을 위해 Firebase 클라우드에 암호화되어 안전하게 저장됩니다.
+    3)   **훈련 중심**: 단순한 위로를 넘어, 자신의 사고 오류를 찾아내고 일상에서 **'행동 숙제'**를 실천하는 능동적인 훈련 과정입니다.
     """)
     if st.button("확인 및 시작하기"):
         st.session_state.show_modal = False
@@ -630,21 +635,37 @@ elif st.session_state.app_step == 4:
     st.subheader("📋 상담 종결 심층 분석 보고서")
 
     if not st.session_state.final_long_report:
-        with st.spinner("7일간의 대화를 분석하여 심층 리포트를 작성 중입니다..."):
+        with st.spinner("전문 임상심리사의 관점으로 2,500자 이상의 심층 리포트를 작성 중입니다..."):
             try:
-                analysis_data = f"내담자: {st.session_state.user_name}\n요약: {st.session_state.daily_summaries}"
-                long_report_prompt = f"당신은 임상심리사입니다. 다음 데이터를 바탕으로 종결 리포트를 2,500자 이상 상세히 작성하세요: {analysis_data}"
+                user_context = f"내담자:{st.session_state.user_name}\n사전/사후점수:{st.session_state.initial_scores}/{st.session_state.final_scores}\n요약:{st.session_state.daily_summaries}"
                 
-                report_model = genai.GenerativeModel('gemini-2.5-flash')
-                response = report_model.generate_content(long_report_prompt)
+                # 정석 양식을 프롬프트에 직접 주입
+                report_prompt = f"""
+                당신은 임상심리사입니다. 아래 [양식]에 맞춰 내담자 데이터를 분석해 2,500자 이상의 리포트를 작성하세요.
+
+                [분석 양식 (이 구조를 엄격히 따를 것)]
+                1. 종합 인지 개념화: 핵심 신념과 자동적 사고 분석
+                2. 상담 과정에서의 변화 양상: 초기-중기-종결기 태도 변화
+                3. 행동 실험 성과: 수행한 숙제들의 심리적 효과 평가
+                4. 향후 6개월 가이드: 일상 실천 과제 3가지 제안
+                5. 재발 방지 전략: 맞춤형 인지 재구조화 문구 가이드
+                6. 최종 소회: 내담자를 향한 진심 어린 응원
+
+                데이터: {user_context}
+                """
+                
+                report_model = genai.GenerativeModel('gemini-1.5-pro') # 깊은 분석을 위해 Pro 모델 사용
+                response = report_model.generate_content(report_prompt)
                 st.session_state.final_long_report = response.text
                 save_state()
-            except:
-                st.error("리포트 생성 중 오류가 발생했습니다.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"리포트 생성 실패: {e}")
 
+    # 화면에 출력
     if st.session_state.final_long_report:
         st.markdown(st.session_state.final_long_report)
-        st.download_button("📥 리포트 다운로드", st.session_state.final_long_report, file_name="CBT_Report.txt")
+        st.download_button("📥 리포트 저장", st.session_state.final_long_report, file_name="CBT_Report.txt")
     
     st.success(f"🎉 모든 인지행동치료(CBT) 여정을 훌륭하게 마친 **{st.session_state.user_name}** 님을 진심으로 축하합니다!")
     st.markdown(f"""
