@@ -71,6 +71,7 @@ def save_state():
         "yesterday_homework": st.session_state.yesterday_homework,
         "session_ended": st.session_state.session_ended,
         "daily_summaries": st.session_state.daily_summaries
+        "final_long_report": st.session_state.final_long_report
     }
     doc_ref.set(data) 
 
@@ -668,17 +669,17 @@ elif st.session_state.app_step == 4:
         st.markdown(st.session_state.final_long_report)
         st.download_button("📥 리포트 저장", st.session_state.final_long_report, file_name="CBT_Report.txt")
     
-    st.success(f"🎉 모든 인지행동치료(CBT) 여정을 훌륭하게 마친 **{st.session_state.user_name}** 님을 진심으로 축하합니다!")
-    st.markdown(f"""
-    <div class="report-box" style="border-left-color: #2196F3;">
-        <div class="report-title" style="color: #1976D2;">상담사 AI의 마지막 편지 💌</div>
-        우리는 지난 시간 동안 함께 자동적 사고를 도출하고, 그 이면에 있는 조건적 가정과 핵심 신념을 들여다보았습니다.<br>
-        때로는 행동 실험을 수행하기 전 두려움에 휩싸여 0%의 완료 가능성을 이야기한 적도 있었고, 결국 은밀한 예행연습을 통해 용기를 내어 100% 실천해 낸 날도 있었습니다.<br><br>
-        <b>기억해 주세요.</b> 부정적인 감정이나 인지 오류가 앞으로 다시는 찾아오지 않는 것은 아닙니다. 
-        하지만 이제 {st.session_state.user_name} 님에게는 스스로 자신의 인지를 평가하고 반응하며, 일상에서 건강한 행동 계획을 세울 수 있는 <b>'인지 재구조화 도구'</b>가 생겼습니다. <br>
-        자신에 대해 긍정적인 결론을 내리는 하루하루가 되시기를 온 마음을 다해 응원합니다.
-    </div>
-    """, unsafe_allow_html=True)
+        st.success(f"🎉 모든 인지행동치료(CBT) 여정을 훌륭하게 마친 **{st.session_state.user_name}** 님을 진심으로 축하합니다!")
+        st.markdown(f"""
+        <div class="report-box" style="border-left-color: #2196F3;">
+            <div class="report-title" style="color: #1976D2;">상담사 AI의 마지막 편지 💌</div>
+            우리는 지난 시간 동안 함께 자동적 사고를 도출하고, 그 이면에 있는 조건적 가정과 핵심 신념을 들여다보았습니다.<br>
+            때로는 행동 실험을 수행하기 전 두려움에 휩싸여 0%의 완료 가능성을 이야기한 적도 있었고, 결국 은밀한 예행연습을 통해 용기를 내어 100% 실천해 낸 날도 있었습니다.<br><br>
+            <b>기억해 주세요.</b> 부정적인 감정이나 인지 오류가 앞으로 다시는 찾아오지 않는 것은 아닙니다. 
+            하지만 이제 {st.session_state.user_name} 님에게는 스스로 자신의 인지를 평가하고 반응하며, 일상에서 건강한 행동 계획을 세울 수 있는 <b>'인지 재구조화 도구'</b>가 생겼습니다. <br>
+            자신에 대해 긍정적인 결론을 내리는 하루하루가 되시기를 온 마음을 다해 응원합니다.
+        </div>
+        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     if not runtime.exists():
