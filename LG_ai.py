@@ -70,7 +70,7 @@ def save_state():
         "user_email": st.session_state.user_email,
         "yesterday_homework": st.session_state.yesterday_homework,
         "session_ended": st.session_state.session_ended,
-        "daily_summaries": st.session_state.daily_summaries
+        "daily_summaries": st.session_state.daily_summaries,
         "final_long_report": st.session_state.final_long_report
     }
     doc_ref.set(data) 
