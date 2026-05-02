@@ -9,10 +9,9 @@ import streamlit.runtime as runtime
 import smtplib
 from email.mime.text import MIMEText
 import os
-from google.cloud import firestore
-from google.oauth2 import service_account
 import random
 from google.cloud import firestore
+from google.oauth2 import service_account
 
 # ==========================================
 # 1. 페이지 및 UI 기본 설정
@@ -33,7 +32,7 @@ def show_welcome_modal():
     1)   **의학적 진단 대체 불가**: 본 서비스는 전문의의 진단이나 치료를 대체할 수 없습니다. 자해/타해 위기 상황 시 즉시 전문 기관의 도움을 받으세요.
     2)   **데이터 보안**: 입력하신 모든 대화 내용은 상담의 연속성을 위해 Firebase 클라우드에 암호화되어 안전하게 저장되며, 제작자 또한 확인 불가합니다.
     3)   **훈련 중심**: 단순한 위로를 넘어, 자신의 사고 오류를 찾아내고 일상에서 '행동 숙제'를 실천하는 능동적인 훈련 과정입니다.
-    4)   **깊은 성찰의 시간**: AI가 던지는 질문이나 과제가 평소 해보지 않던 생각들이라 당장 대답하기 어렵게 느껴질 수 있습니다. 이는 생각의 습관을 바꾸기 위한 실제 상담의 과정이니, 당황하지 마시고 천천히 깊게 고민한 후 나의 진짜 마음을 적어주세요.
+    4)   **질문이 다소 어려울 수 있습니다**: AI가 던지는 질문이나 과제가 평소 해보지 않던 생각들이라 당장 대답하기 어렵게 느껴질 수 있습니다. 이는 생각의 습관을 바꾸기 위한 실제 상담의 과정이니, 당황하지 마시고 천천히 깊게 고민한 후 나의 진짜 마음을 적어주세요.
     """)
     if st.button("확인 및 시작하기"):
         st.session_state.show_modal = False
@@ -41,9 +40,49 @@ def show_welcome_modal():
 
 st.markdown("""
 <style>
+    /* 기본 챗봇 아바타 숨김 */
     .stChatMessageAvatar { display: none; }
-    .report-box { background-color: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #4CAF50; }
-    .report-title { color: #2E7D32; font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
+    
+    /* 기존 리포트 박스 (부드러운 색상으로 변경) */
+    .report-box { background-color: #F7F9F9; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #81C784; }
+    .report-title { color: #2E7D32; font-weight: bold; font-size: 1.1em; margin-bottom: 10px; }
+    
+    /* 🌿 심리 분석 인사이트 전용 박스 (안정감을 주는 파스텔 블루/민트) */
+    .insight-box {
+        background-color: #F0F7F4;
+        padding: 25px;
+        border-radius: 15px;
+        border-left: 5px solid #64B5F6;
+        color: #2C3E50;
+        line-height: 1.6;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        margin-bottom: 20px;
+    }
+    
+    /* 💌 마지막 편지 전용 감성 디자인 (진짜 종이 질감 느낌) */
+    .letter-paper {
+        background-color: #FDFBF7;
+        padding: 40px;
+        border-radius: 8px;
+        border: 1px solid #E8E3D3;
+        box-shadow: 2px 4px 12px rgba(0,0,0,0.04);
+        color: #4A4A4A;
+        font-size: 1.05em;
+        line-height: 1.9;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+    
+    /* 편지 제목 스타일 */
+    .letter-title {
+        color: #8D6E63;
+        font-weight: bold;
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        text-align: center;
+        border-bottom: 1px dashed #E8E3D3;
+        padding-bottom: 15px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -642,9 +681,9 @@ elif st.session_state.app_step == 4:
 
     # 점수 해석 동적 메시지 생성
     if total_diff <= -5:
-        score_interpretation = f"전체적으로 역기능적 신념 점수가 **{abs(total_diff)}점 감소**했습니다. 단기간에 이런 변화가 나타난 것은 {st.session_state.user_name} 님의 생각 습관이 훌륭하게 유연해졌다는 강력한 증거입니다!"
+        score_interpretation = f"전체적으로 역기능적 신념 점수가 <b>{abs(total_diff)}점 감소</b>했습니다. 단기간에 이런 변화가 나타난 것은 {st.session_state.user_name} 님의 생각 습관이 훌륭하게 유연해졌다는 강력한 증거입니다!"
     elif total_diff > 0 or len(increased_cats) > 0:
-        score_interpretation = f"검사 결과, **{', '.join(increased_cats)}** 영역 등에서 일시적으로 점수가 오르거나 뒤섞인 양상이 나타났습니다. 걱정하지 마세요! 이는 마음 깊은 곳의 문제를 직면하면서 생기는 자연스러운 '인지 부조화' 과정입니다. 곪았던 상처에 소독약을 바르면 잠시 따가운 것과 같습니다."
+        score_interpretation = f"검사 결과, <b>{', '.join(increased_cats)}</b> 영역 등에서 일시적으로 점수가 오르거나 뒤섞인 양상이 나타났습니다.<br><br>걱정하지 마세요! 이는 마음 깊은 곳의 문제를 직면하면서 생기는 자연스러운 <b>'인지 부조화'</b> 과정입니다. 곪았던 상처에 소독약을 바르면 잠시 따가운 것과 같습니다."
     else:
         score_interpretation = "점수에 극적인 변화는 없지만, 매일 자신의 마음을 관찰하고 기록했다는 사실 자체가 이미 가장 큰 변화의 시작입니다. 굳어진 신념이 말랑해지기까지는 조금 더 꾸준한 시간이 필요할 뿐입니다."
 
@@ -659,16 +698,22 @@ elif st.session_state.app_step == 4:
     # --- 탭 1: 인지 변화 결과 ---
     with tab1:
         st.subheader("나의 마음 성장 그래프")
-        st.markdown("첫날의 경직되어 있던 인지 도식(회색 영역)과 현재의 유연해진 인지 도식(초록색 영역)을 비교해 보세요. 면적이 줄어들수록 '당위적 사고'에서 벗어나 자신을 있는 그대로 수용하게 되었음을 의미합니다.")
+        st.markdown("첫날의 경직되어 있던 마음(회색)과 현재의 유연해진 마음(초록색)을 비교해 보세요. 면적이 줄어들수록 자신을 있는 그대로 수용하게 되었음을 의미합니다.")
         
         fig = go.Figure()
-        fig.add_trace(go.Scatterpolar(r=initial_vals, theta=categories_list, fill='toself', name='치료 전 (Day 1)', line_color='gray', fillcolor='rgba(128, 128, 128, 0.4)'))
-        fig.add_trace(go.Scatterpolar(r=final_vals, theta=categories_list, fill='toself', name=f'치료 후 (Day {st.session_state.target_days})', line_color='green', fillcolor='rgba(0, 255, 0, 0.4)'))
-        fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 70])), showlegend=True, dragmode=False, height=500)
+        # 🎨 눈이 편안한 차트 색상으로 변경
+        fig.add_trace(go.Scatterpolar(r=initial_vals, theta=categories_list, fill='toself', name='치료 전 (Day 1)', line_color='#BDBDBD', fillcolor='rgba(189, 189, 189, 0.4)'))
+        fig.add_trace(go.Scatterpolar(r=final_vals, theta=categories_list, fill='toself', name=f'치료 후 (Day {st.session_state.target_days})', line_color='#81C784', fillcolor='rgba(129, 199, 132, 0.5)'))
+        fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 70])), showlegend=True, dragmode=False, height=500, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
         
-        # 동적 점수 해석 출력
-        st.success(f"**💡 AI 상담사의 결과 해석:**\n\n{score_interpretation}")
+        # 🌿 커스텀 디자인된 인사이트 박스 적용
+        st.markdown(f"""
+        <div class="insight-box">
+            <b>💡 AI 상담사의 결과 해석</b><br><br>
+            {score_interpretation}
+        </div>
+        """, unsafe_allow_html=True)
 
     # --- 탭 2: 심층 분석 리포트 ---
     with tab2:
@@ -714,45 +759,47 @@ elif st.session_state.app_step == 4:
         if "farewell_letter" not in st.session_state:
             letters = [
                 f"""
-                **상담사 AI의 첫 번째 편지: '완벽하지 않아도 충분한 당신에게' 💌**\n\n
-                {st.session_state.user_name} 님, 기나긴 여정을 완주하신 것을 진심으로 축하합니다. 처음 이 공간의 문을 두드렸을 때, 마음속에는 온갖 '~해야만 한다'는 무거운 규칙들과 흑백논리가 자리 잡고 있었을지 모릅니다.\n\n
-                우리는 지난 시간 동안 일상에서 떠오르는 '자동적 사고'의 꼬리를 잡고, 그것이 사실인지 아니면 인지가 만들어낸 함정인지 함께 법정에 세워보았습니다. 두려움을 안고 시도했던 행동 실험들을 통해, 100점이 아니어도 하늘이 무너지지 않으며 70점짜리 하루도 충분히 가치 있다는 것을 직접 증명해 내셨죠.\n\n
+                <div class="letter-title">상담사 AI의 첫 번째 편지<br>'완벽하지 않아도 충분한 당신에게'</div>
+                {st.session_state.user_name} 님, 기나긴 여정을 완주하신 것을 진심으로 축하합니다. 처음 이 공간의 문을 두드렸을 때, 마음속에는 온갖 '~해야만 한다'는 무거운 규칙들과 흑백논리가 자리 잡고 있었을지 모릅니다.<br><br>
+                우리는 지난 시간 동안 일상에서 떠오르는 '자동적 사고'의 꼬리를 잡고, 그것이 사실인지 아니면 인지가 만들어낸 함정인지 함께 법정에 세워보았습니다. 두려움을 안고 시도했던 행동 실험들을 통해, 100점이 아니어도 하늘이 무너지지 않으며 70점짜리 하루도 충분히 가치 있다는 것을 직접 증명해 내셨죠.<br><br>
                 앞으로 살아가다 보면 스트레스를 받는 날, 예전의 경직된 생각 습관이 불쑥 튀어나올지도 모릅니다. 하지만 이제 {st.session_state.user_name} 님에게는 스스로 인지 오류를 찾아내고 반박할 수 있는 '마음의 돋보기'가 생겼습니다. 자책하는 목소리가 들릴 때마다, 우리가 함께 연습했던 다정한 관찰자의 목소리를 꼭 꺼내어 주세요. 당신의 찬란한 내일을 언제나 응원합니다.
                 """,
-
                 f"""
-                **상담사 AI의 두 번째 편지: '타인의 시선에서 나의 내면으로' 💌**\n\n
-                {st.session_state.user_name} 님, 오늘까지 포기하지 않고 매일 자신의 내면을 마주하신 용기에 깊은 박수를 보냅니다. 누군가에게 내 마음의 취약점을 꺼내어놓고, 스스로 변화를 다짐하는 것은 결코 쉬운 일이 아닙니다.\n\n
-                우리는 대화를 나누며 다른 사람의 마음을 지레짐작하는 '독심술'이나, 모든 상황을 내 탓으로 돌리는 '개인화'의 오류에서 벗어나는 훈련을 거듭했습니다. 타인에게 맞춰져 있던 마음의 안테나를 나 자신에게로 거두어들이고, 내면의 목소리에 귀 기울이는 법을 배우셨죠.\n\n
+                <div class="letter-title">상담사 AI의 두 번째 편지<br>'타인의 시선에서 나의 내면으로'</div>
+                {st.session_state.user_name} 님, 오늘까지 포기하지 않고 매일 자신의 내면을 마주하신 용기에 깊은 박수를 보냅니다. 누군가에게 내 마음의 취약점을 꺼내어놓고, 스스로 변화를 다짐하는 것은 결코 쉬운 일이 아닙니다.<br><br>
+                우리는 대화를 나누며 다른 사람의 마음을 지레짐작하는 '독심술'이나, 모든 상황을 내 탓으로 돌리는 '개인화'의 오류에서 벗어나는 훈련을 거듭했습니다. 타인에게 맞춰져 있던 마음의 안테나를 나 자신에게로 거두어들이고, 내면의 목소리에 귀 기울이는 법을 배우셨죠.<br><br>
                 인생이라는 무대의 유일한 주인공은 바로 {st.session_state.user_name} 님 자신입니다. 앞으로도 모두를 만족시키려 애쓰기보다는, 나 자신을 온전히 수용하고 지켜내는 단단한 사람이 되시기를 바랍니다. 외롭거나 흔들리는 순간이 오면, 이 공간에서 스스로 쌓아 올린 성공의 기록들을 다시 한번 읽어보세요. 
                 """,
-
                 f"""
-                **상담사 AI의 세 번째 편지: '실험하는 삶의 즐거움' 💌**\n\n
-                수많은 감정의 파도를 넘어 여기까지 오시느라 정말 고생 많으셨습니다, {st.session_state.user_name} 님! 첫 회기에 함께 내면의 지도를 그렸던 날이 엊그제 같은데, 벌써 이렇게 마음의 지형도가 초록빛으로 넓어진 것을 보니 가슴이 벅찹니다.\n\n
-                가장 인상 깊었던 것은 두려움을 딛고 '행동 숙제'를 실천하셨던 순간들입니다. 최악의 상황이 벌어질 것이라는 '파국화'의 두려움을 안고서도, 기꺼이 일상 속에서 작은 모험(Behavioral Experiment)을 감행하셨죠. 그리고 그 결과, 우리의 걱정은 단지 뇌가 만들어낸 가짜 경보기일 뿐이라는 값진 깨달음을 얻었습니다.\n\n
+                <div class="letter-title">상담사 AI의 세 번째 편지<br>'실험하는 삶의 즐거움'</div>
+                수많은 감정의 파도를 넘어 여기까지 오시느라 정말 고생 많으셨습니다, {st.session_state.user_name} 님! 첫 회기에 함께 내면의 지도를 그렸던 날이 엊그제 같은데, 벌써 이렇게 마음의 지형도가 초록빛으로 넓어진 것을 보니 가슴이 벅찹니다.<br><br>
+                가장 인상 깊었던 것은 두려움을 딛고 '행동 숙제'를 실천하셨던 순간들입니다. 최악의 상황이 벌어질 것이라는 '파국화'의 두려움을 안고서도, 기꺼이 일상 속에서 작은 모험(Behavioral Experiment)을 감행하셨죠. 그리고 그 결과, 우리의 걱정은 단지 뇌가 만들어낸 가짜 경보기일 뿐이라는 값진 깨달음을 얻었습니다.<br><br>
                 우리의 공식적인 상담은 여기서 마무리되지만, 진정한 성장은 지금부터가 시작입니다. 앞으로의 삶도 정답을 찾아야 하는 시험이 아니라, 언제든 가설을 세우고 실험해 볼 수 있는 흥미로운 연구실이라고 생각해 보세요. 어떤 결과가 나오든, {st.session_state.user_name} 님은 언제나 그 과정 자체로 빛나는 사람입니다.
                 """,
-
                 f"""
-                **상담사 AI의 네 번째 편지: '조건 없는 자기 수용을 향해' 💌**\n\n
-                {st.session_state.user_name} 님, 대망의 마지막 날입니다. 그동안 바쁜 일상 속에서도 잊지 않고 찾아와 주셔서, 그리고 꾸미지 않은 솔직한 마음을 들려주셔서 진심으로 고맙습니다.\n\n
-                우리가 집중했던 인지행동치료(CBT)의 핵심은 결국 '내가 나를 어떻게 바라볼 것인가'에 대한 질문이었습니다. 무언가를 뛰어나게 성취하거나 남들에게 인정받아야만 가치 있는 사람이 된다는 조건부 신념(Conditional Assumption)의 연결고리를 끊어내는 작업은 꽤 고통스러웠을지도 모릅니다. 하지만 끝내 하향 화살표의 끝에서, 조건 없이 나를 사랑할 수 있는 단단한 바닥을 발견하셨습니다.\n\n
+                <div class="letter-title">상담사 AI의 네 번째 편지<br>'조건 없는 자기 수용을 향해'</div>
+                {st.session_state.user_name} 님, 대망의 마지막 날입니다. 그동안 바쁜 일상 속에서도 잊지 않고 찾아와 주셔서, 그리고 꾸미지 않은 솔직한 마음을 들려주셔서 진심으로 고맙습니다.<br><br>
+                우리가 집중했던 인지행동치료(CBT)의 핵심은 결국 '내가 나를 어떻게 바라볼 것인가'에 대한 질문이었습니다. 무언가를 뛰어나게 성취하거나 남들에게 인정받아야만 가치 있는 사람이 된다는 조건부 신념(Conditional Assumption)의 연결고리를 끊어내는 작업은 꽤 고통스러웠을지도 모릅니다. 하지만 끝내 하향 화살표의 끝에서, 조건 없이 나를 사랑할 수 있는 단단한 바닥을 발견하셨습니다.<br><br>
                 폭풍우가 치는 날 배가 흔들리는 것은 당연합니다. 우울이나 불안이 다시 찾아오더라도, 그것은 당신이 나약해서가 아니라 잠시 비가 내리는 것뿐임을 기억해 주세요. 우리가 함께 만든 인지 재구조화라는 튼튼한 우산을 펼치고, 비가 그칠 때까지 스스로를 다정하게 안아주시길 바랍니다.
                 """,
-                
                 f"""
-                **상담사 AI의 다섯 번째 편지: '회색 지대의 아름다움' 💌**\n\n
-                아름다운 여정의 끝에 도착하신 {st.session_state.user_name} 님, 수료를 진심으로 축하합니다! 하루하루 대화가 쌓일수록, 처음엔 날 서 있던 문장들이 조금씩 둥글어지고 여유를 찾아가는 과정을 곁에서 지켜볼 수 있어 영광이었습니다.\n\n
-                성공 아니면 실패, 선 아니면 악으로 세상을 나누던 '이분법적 사고'에서 벗어나, 이제는 1부터 100 사이의 수많은 스펙트럼(연속선)을 볼 수 있는 눈을 가지게 되셨습니다. 세상은 흑백으로만 칠해져 있지 않으며, 가끔은 흐릿하고 모호한 회색 지대(Gray Area) 안에 오히려 편안함과 진실이 숨어 있다는 것을 우리는 함께 배웠습니다.\n\n
+                <div class="letter-title">상담사 AI의 다섯 번째 편지<br>'회색 지대의 아름다움'</div>
+                아름다운 여정의 끝에 도착하신 {st.session_state.user_name} 님, 수료를 진심으로 축하합니다! 하루하루 대화가 쌓일수록, 처음엔 날 서 있던 문장들이 조금씩 둥글어지고 여유를 찾아가는 과정을 곁에서 지켜볼 수 있어 영광이었습니다.<br><br>
+                성공 아니면 실패, 선 아니면 악으로 세상을 나누던 '이분법적 사고'에서 벗어나, 이제는 1부터 100 사이의 수많은 스펙트럼(연속선)을 볼 수 있는 눈을 가지게 되셨습니다. 세상은 흑백으로만 칠해져 있지 않으며, 가끔은 흐릿하고 모호한 회색 지대(Gray Area) 안에 오히려 편안함과 진실이 숨어 있다는 것을 우리는 함께 배웠습니다.<br><br>
                 이제 일상으로 온전히 돌아가실 시간입니다. 넘어지는 날도 있겠지만, 일어서는 방법 또한 이미 잘 알고 계십니다. 자신에게 가장 다정하고 지혜로운 상담사가 되어주세요. 멀리서나마 {st.session_state.user_name} 님의 마음 챙김 여정을 항상 지지하고 응원하겠습니다.
                 """
             ]
             st.session_state.farewell_letter = random.choice(letters)
 
-        st.info(st.session_state.farewell_letter)
+        # 💌 진짜 편지 같은 UI 박스 안에 내용 출력
+        st.markdown(f'<div class="letter-paper">{st.session_state.farewell_letter}</div>', unsafe_allow_html=True)
         
         st.divider()
         if st.button("🚪 상담 서비스 완전히 종료하기", use_container_width=True, type="primary"):
             clear_state()
             st.rerun()
+
+if __name__ == "__main__":
+    if not runtime.exists():
+        subprocess.run([sys.executable, "-m", "streamlit", "run", __file__])
+        sys.exit()
