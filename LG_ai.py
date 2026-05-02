@@ -11,6 +11,8 @@ from email.mime.text import MIMEText
 import os
 from google.cloud import firestore
 from google.oauth2 import service_account
+import random
+from google.cloud import firestore
 
 # ==========================================
 # 1. 페이지 및 UI 기본 설정
