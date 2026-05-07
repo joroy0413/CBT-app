@@ -114,7 +114,6 @@ st.markdown("""
     /* 10. 편지 */
     .letter-paper {
         background-color: inherit;
-        background-image: radial-gradient(#E8E3D3 1px, transparent 1px);
         background-size: 20px 20px;
         padding: 45px 40px;
         border-radius: 12px;
