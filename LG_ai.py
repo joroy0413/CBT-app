@@ -97,7 +97,7 @@ st.markdown("""
         color: inherit;
         line-height: 1.7;
     }
-    .report-title { color: #2E7D32; font-weight: 800; font-size: 1.15em; margin-bottom: 12px; }
+    .report-title { color: inherit; font-weight: 800; font-size: 1.15em; margin-bottom: 12px; }
     
     /* 9. AI 인사이트 박스  */
     .insight-box {
@@ -127,7 +127,7 @@ st.markdown("""
         margin-bottom: 25px;
     }
     .letter-title {
-        color: #8D6E63;
+        color: inherit;
         font-weight: 800;
         font-size: 1.35em;
         margin-bottom: 25px;
