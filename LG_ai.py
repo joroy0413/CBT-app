@@ -101,7 +101,7 @@ st.markdown("""
     
     /* 9. AI 인사이트 박스  */
     .insight-box {
-        background: linear-gradient(135deg, #F0F7F4, #E8F3EF);
+        background: linear-gradient(135deg, #F0F7F4,inherit);
         padding: 30px;
         border-radius: 20px;
         border-left: 6px solid #81C784;
