@@ -29,11 +29,6 @@ st.markdown("""
     .material-symbols-rounded, .material-icons {
         font-family: 'Material Symbols Rounded', 'Material Icons' !important;
     }
-
-    /* 2. 전체 배경색 */
-    .stApp {
-        background-color: #FAFAFA;
-    }
     
     /* 3. 챗버블(메시지 내용) 공통 스타일 */
     [data-testid="stChatMessageContent"] {
@@ -42,7 +37,7 @@ st.markdown("""
         border-radius: 20px !important;
         padding: 15px 20px !important;
         box-shadow: 0 2px 10px rgba(0,0,0,0.03) !important;
-        color: #424242 !important;
+        color: inherit !important;
         line-height: 1.6 !important;
     }
 
@@ -99,7 +94,7 @@ st.markdown("""
         margin-bottom: 20px; 
         border-left: 6px solid #A5D6A7; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        color: #424242;
+        color: inherit;
         line-height: 1.7;
     }
     .report-title { color: #2E7D32; font-weight: 800; font-size: 1.15em; margin-bottom: 12px; }
@@ -110,7 +105,7 @@ st.markdown("""
         padding: 30px;
         border-radius: 20px;
         border-left: 6px solid #81C784;
-        color: #37474F;
+        color: inherit;
         line-height: 1.7;
         box-shadow: 0 8px 24px rgba(0,0,0,0.04);
         margin-bottom: 25px;
@@ -125,7 +120,7 @@ st.markdown("""
         border-radius: 12px;
         border: 1px solid #EAE6D8;
         box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-        color: #5D554D;
+        color: inherit;
         font-size: 1.05em;
         line-height: 2.0;
         margin-top: 15px;
