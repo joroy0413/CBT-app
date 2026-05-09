@@ -761,7 +761,7 @@ elif st.session_state.app_step == 4:
             decreased_cats.append(cat)
 
     if total_diff <= -5:
-        score_interpretation = f"전체적으로 무겁던 신념 점수가 <b>{abs(total_diff)}점이나 사르르 녹아내렸습니다.</b> 단기간에 이런 변화가 나타난 것은 {st.session_state.user_name} 님의 생각 습관이 훌륭하게 유연해졌다는 가장 확실하고 긍정적인 증거입니다!"
+        score_interpretation = f"전체적으로 무겁던 신념 점수가 <b>{abs(total_diff)}점이나 줄어들었습니다.</b> 단기간에 이런 변화가 나타난 것은 {st.session_state.user_name} 님의 생각 습관이 훌륭하게 유연해졌다는 가장 확실하고 긍정적인 증거입니다!"
     elif total_diff > 0 or len(increased_cats) > 0:
         score_interpretation = f"검사 결과, <b>{', '.join(increased_cats)}</b> 영역 등에서 점수가 오르거나 뒤섞인 양상이 나타났습니다.<br><br>하지만 전혀 걱정하지 마세요. 이는 마음 깊은 곳의 상처를 외면하지 않고 똑바로 직면하면서 생기는 자연스러운 <b>'인지 부조화'</b> 과정입니다. 곪았던 상처를 치료할 때 소독약이 닿아 잠시 따가운 것과 같은 아주 건강한 신호입니다."
     else:
@@ -794,7 +794,7 @@ elif st.session_state.app_step == 4:
         st.subheader("📋 여정 종결 심층 분석 보고서")
         
         if not st.session_state.final_long_report:
-            with st.spinner("전문가의 시선으로 그간의 대화 기록을 엮어 다정한 심층 리포트를 작성 중입니다... (약 10~20초 소요)"):
+            with st.spinner("그간의 대화 기록을 엮어 다정한 심층 리포트를 작성 중입니다... (약 10~20초 소요)"):
                 try:
                     user_context = f"내담자:{st.session_state.user_name}\n사전/사후점수:{st.session_state.initial_scores}/{st.session_state.final_scores}\n요약:{st.session_state.daily_summaries}"
                     report_prompt = f"""
