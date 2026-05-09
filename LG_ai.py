@@ -37,7 +37,7 @@ st.markdown("""
         border-radius: 20px !important;
         padding: 15px 20px !important;
         box-shadow: 0 2px 10px rgba(0,0,0,0.03) !important;
-        color: inherit !important;
+        color: #333333 !important; /* 수정: 다크모드 방어용 진한 글씨 고정 */
         line-height: 1.6 !important;
     }
 
@@ -94,18 +94,18 @@ st.markdown("""
         margin-bottom: 20px; 
         border-left: 6px solid #A5D6A7; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        color: inherit;
+        color: #333333 !important; /* 수정 */
         line-height: 1.7;
     }
-    .report-title { color: inherit; font-weight: 800; font-size: 1.15em; margin-bottom: 12px; }
+    .report-title { color: #111111 !important; font-weight: 800; font-size: 1.15em; margin-bottom: 12px; } /* 수정 */
     
     /* 9. AI 인사이트 박스  */
     .insight-box {
-        background: linear-gradient(135deg, #F0F7F4,inherit);
+        background: linear-gradient(135deg, #F0F7F4, #FFFFFF); /* 수정: inherit 대신 명시적 색상 */
         padding: 30px;
         border-radius: 20px;
         border-left: 6px solid #81C784;
-        color: inherit;
+        color: #333333 !important; /* 수정 */
         line-height: 1.7;
         box-shadow: 0 8px 24px rgba(0,0,0,0.04);
         margin-bottom: 25px;
@@ -113,20 +113,20 @@ st.markdown("""
     
     /* 10. 편지 */
     .letter-paper {
-        background-color: inherit;
+        background-color: #FDFAEF; /* 수정: 편지지 느낌의 따뜻한 상아색 고정 */
         background-size: 20px 20px;
         padding: 45px 40px;
         border-radius: 12px;
         border: 1px solid #EAE6D8;
         box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-        color: inherit;
+        color: #333333 !important; /* 수정 */
         font-size: 1.05em;
         line-height: 2.0;
         margin-top: 15px;
         margin-bottom: 25px;
     }
     .letter-title {
-        color: inherit;
+        color: #111111 !important; /* 수정 */
         font-weight: 800;
         font-size: 1.35em;
         margin-bottom: 25px;
@@ -135,6 +135,7 @@ st.markdown("""
         padding-bottom: 20px;
     }
 </style>
+
 """, unsafe_allow_html=True)
 
 @st.dialog("🛋️ 사용 전 필수 주의사항")
